@@ -62,6 +62,27 @@
                                     <x-text-input name="items[0][shoe_brand]" type="text" class="mt-1 block w-full" />
                                 </div>
                             </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <x-input-label :value="__('Ukuran Sepatu')" />
+                                    <x-text-input name="items[0][shoe_size]" type="text" class="mt-1 block w-full" placeholder="Cth: 42" />
+                                </div>
+                                <div>
+                                    <x-input-label :value="__('Bahan Sepatu')" />
+                                    <select name="items[0][shoe_material]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        <option value="">-- Pilih Bahan --</option>
+                                        <option value="Kanvas">Kanvas</option>
+                                        <option value="Suede">Suede</option>
+                                        <option value="Kulit">Kulit</option>
+                                        <option value="Nubuck">Nubuck</option>
+                                        <option value="Mesh">Mesh</option>
+                                        <option value="Rajut">Rajut</option>
+                                        <option value="Poliester">Poliester</option>
+                                        <option value="Karet">Karet</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -160,15 +181,15 @@
                     </h2>
                 </header>
                 <div class="mt-6 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-center">
                         <thead>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Kode Tracking</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Item</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Pembayaran</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status Pesanan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Kode Tracking</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Item</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status Pesanan</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Pembayaran</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -179,18 +200,18 @@
                                     {{ $order->items->count() }} sepatu
                                 </td>
                                 <td class="px-6 py-4 text-sm">
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-semibold">{{ ucfirst($order->status) }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
                                     <div class="flex flex-col gap-1">
-                                        <span class="text-xs font-semibold text-gray-500">{{ $order->payment_method }}</span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase w-fit {{ $order->payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        <span class="text-sm text-gray-900 dark:text-gray-100">{{ $order->payment_method }}</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase w-fit mx-auto {{ $order->payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                             {{ $order->payment_status === 'paid' ? 'Lunas' : 'Belum Lunas' }}
                                         </span>
                                         @if($order->payment_status === 'unpaid' && $order->payment_method !== 'Cash')
                                             <a href="{{ route('payment.pay', $order) }}" class="text-xs text-indigo-600 hover:underline font-bold mt-1">Bayar Sekarang</a>
                                         @endif
                                     </div>
-                                </td>
-                                <td class="px-6 py-4 text-sm">
-                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-semibold">{{ ucfirst($order->status) }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $order->created_at->format('d M Y') }}</td>
@@ -244,6 +265,26 @@
                         <div>
                             <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">Merek (Opsional)</label>
                             <input name="items[${itemIndex}][shoe_brand]" type="text" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">Ukuran Sepatu</label>
+                            <input name="items[${itemIndex}][shoe_size]" type="text" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" placeholder="Cth: 42" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">Bahan Sepatu</label>
+                            <select name="items[${itemIndex}][shoe_material]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <option value="">-- Pilih Bahan --</option>
+                                <option value="Kanvas">Kanvas</option>
+                                <option value="Suede">Suede</option>
+                                <option value="Kulit">Kulit</option>
+                                <option value="Nubuck">Nubuck</option>
+                                <option value="Mesh">Mesh</option>
+                                <option value="Rajut">Rajut</option>
+                                <option value="Poliester">Poliester</option>
+                                <option value="Karet">Karet</option>
+                            </select>
                         </div>
                     </div>
                 `;

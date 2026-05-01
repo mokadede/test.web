@@ -33,7 +33,12 @@
  <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $order->user->name }}</td>
  <td class="px-4 py-4 text-sm text-gray-500">
  @foreach($order->items as $item)
- <div><b>{{ $item->shoe_name }}</b> ({{ $item->service->name }})</div>
+ <div>
+ <b>{{ $item->shoe_name }}</b> ({{ $item->service->name }})
+ @if($item->shoe_size || $item->shoe_material)
+ <br><small class="text-xs text-gray-500">Ukuran: {{ $item->shoe_size ?? '-' }} | Bahan: {{ $item->shoe_material ?? '-' }}</small>
+ @endif
+ </div>
  @endforeach
  @if($order->voucher_code)
  <div class="text-green-500 text-xs mt-1">Voucher: {{ $order->voucher_code }} (-Rp {{ number_format($order->discount_amount, 0, ',', '.') }})</div>
@@ -60,6 +65,10 @@
  </select>
  <x-primary-button class="px-2 py-1 text-xs">Update</x-primary-button>
  </form>
+
+ <a href="{{ route('admin.orders.edit', $order) }}" class="inline-flex items-center justify-center px-2 py-1 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+ ✏️ Edit Data
+ </a>
 
  @if($order->user->whatsapp)
  <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->user->whatsapp) }}?text={{ urlencode('Halo ' . $order->user->name . ', pesanan sepatu Anda telah diterima. Kode tracking Anda adalah: ' . $order->tracking_code . '. Silakan cek progresnya di: ' . route('track')) }}" 

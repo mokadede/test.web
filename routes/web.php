@@ -18,8 +18,11 @@ Route::post('/track', [TrackingController::class, 'search'])->name('track.search
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
-        if (in_array(auth()->user()->role, ['owner', 'karyawan'])) {
+        if (auth()->user()->role === 'owner') {
             return redirect()->route('admin.dashboard');
+        }
+        if (auth()->user()->role === 'karyawan') {
+            return redirect()->route('admin.orders');
         }
         return redirect()->route('customer.dashboard');
     })->name('dashboard');
@@ -28,14 +31,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 
     Route::middleware('is_admin')->group(function () {
-        // Redirection for admin dashboard
-        Route::get('/admin/dashboard', function () {
-            return redirect()->route('admin.orders');
-        })->name('admin.dashboard');
+        // Real admin dashboard for graph & export
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/admin/orders/export', [AdminController::class, 'exportExcel'])->name('admin.orders.export');
 
         // Karyawan & Owner
         Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
         Route::patch('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('admin.orders.status');
+        Route::get('/admin/orders/{order}/edit', [AdminController::class, 'editOrder'])->name('admin.orders.edit');
+        Route::put('/admin/orders/{order}', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
 
         // Owner Only
         Route::get('/admin/services', [AdminController::class, 'services'])->name('admin.services');

@@ -42,9 +42,118 @@ class AdminController extends Controller
         return back()->with('success', 'Status pesanan berhasil diperbarui.');
     }
 
+    public function editOrder(Order $order)
+    {
+        $order->load('items.service');
+        $services = Service::all();
+        return view('admin.orders-edit', compact('order', 'services'));
+    }
+
+    public function updateOrder(Request $request, Order $order)
+    {
+        $request->validate([
+            'payment_status' => 'required|in:unpaid,paid',
+            'status' => 'required|string',
+            'items' => 'required|array',
+        ]);
+
+        $order->update([
+            'payment_status' => $request->payment_status,
+            'status' => $request->status,
+        ]);
+
+        foreach ($request->items as $id => $itemData) {
+            $item = \App\Models\OrderItem::findOrFail($id);
+            if ($item->order_id == $order->id) {
+                $item->update([
+                    'service_id' => $itemData['service_id'],
+                    'shoe_name' => $itemData['shoe_name'],
+                    'shoe_brand' => $itemData['shoe_brand'] ?? null,
+                    'shoe_size' => $itemData['shoe_size'] ?? null,
+                    'shoe_material' => $itemData['shoe_material'] ?? null,
+                ]);
+            }
+        }
+
+        $totalPrice = 0;
+        foreach ($order->items()->get() as $item) {
+            $totalPrice += $item->service->price;
+        }
+        
+        $discountAmount = 0;
+        if ($order->voucher_code) {
+            $voucher = \App\Models\Voucher::where('code', $order->voucher_code)->first();
+            if ($voucher) {
+                if ($voucher->discount_type == 'percent') {
+                    $discountAmount = $totalPrice * ($voucher->discount_amount / 100);
+                } else {
+                    $discountAmount = $voucher->discount_amount;
+                }
+                if ($discountAmount > $totalPrice) $discountAmount = $totalPrice;
+            }
+        }
+
+        $order->update([
+            'total_price' => $totalPrice - $discountAmount,
+            'discount_amount' => $discountAmount
+        ]);
+
+        return redirect()->route('admin.orders')->with('success', 'Data pesanan berhasil diperbarui.');
+    }
+
     // Owner Only Methods
     private function checkOwner() {
         abort_if(auth()->user()->role !== 'owner', 403, 'Akses ditolak. Hanya untuk Owner.');
+    }
+
+    public function dashboard()
+    {
+        $this->checkOwner();
+        
+        $ordersPerMonth = Order::selectRaw('strftime("%m", created_at) as month, SUM(total_price) as total_revenue, COUNT(*) as total_orders')
+            ->where('payment_status', 'paid')
+            ->whereRaw('strftime("%Y", created_at) = ?', [date('Y')])
+            ->groupBy('month')
+            ->get();
+            
+        $chartData = array_fill(1, 12, 0);
+        foreach ($ordersPerMonth as $data) {
+            $chartData[(int)$data->month] = $data->total_revenue;
+        }
+
+        return view('admin.dashboard', compact('chartData'));
+    }
+
+    public function exportExcel()
+    {
+        $this->checkOwner();
+        $orders = Order::with('user', 'items.service')->where('payment_status', 'paid')->get();
+        
+        $filename = "orders_export_" . date('Y-m-d') . ".csv";
+        $handle = fopen('php://temp', 'w+');
+        fputcsv($handle, ['Tracking Code', 'Pelanggan', 'Layanan', 'Total Harga', 'Tanggal', 'Metode Pembayaran']);
+
+        foreach($orders as $order) {
+            $services = $order->items->map(function($item) {
+                return $item->shoe_name . ' (' . $item->service->name . ')';
+            })->implode(', ');
+            
+            fputcsv($handle, [
+                $order->tracking_code,
+                $order->user->name,
+                $services,
+                $order->total_price,
+                $order->created_at->format('Y-m-d'),
+                $order->payment_method
+            ]);
+        }
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($content)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function storeService(Request $request)

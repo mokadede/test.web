@@ -7,14 +7,18 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-theme-script />
 </head>
 <body class="antialiased font-sans bg-gray-100 dark:bg-gray-900 min-h-screen">
 
     <!-- Simple Nav -->
     <nav class="bg-white dark:bg-gray-800 shadow-sm">
         <div class="max-w-3xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/" class="font-bold text-lg text-gray-800 dark:text-white">🧹 Shoe Laundry</a>
-            <div class="flex gap-4 text-sm">
+            <a href="/" class="flex items-center gap-3 font-bold text-lg text-gray-800 dark:text-white">
+                <img src="/images/logo.jpg" alt="Logo" class="h-10 w-auto rounded-lg object-contain">
+                
+            </a>
+            <div class="flex gap-4 text-sm items-center">
                 <a href="/" class="text-gray-500 hover:text-gray-800 dark:hover:text-white">Beranda</a>
                 @if (Route::has('login'))
                     @auth
@@ -23,6 +27,7 @@
                         <a href="{{ route('login') }}" class="text-gray-500 hover:text-gray-800 dark:hover:text-white">Log in</a>
                     @endauth
                 @endif
+                <x-theme-toggle />
             </div>
         </div>
     </nav>

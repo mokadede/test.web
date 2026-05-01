@@ -15,6 +15,8 @@ class OrderController extends Controller
             'items.*.service_id' => 'required|exists:services,id',
             'items.*.shoe_name' => 'required|string|max:255',
             'items.*.shoe_brand' => 'nullable|string|max:255',
+            'items.*.shoe_size' => 'nullable|string|max:50',
+            'items.*.shoe_material' => 'nullable|string|max:100',
             'payment_method' => 'required|string|in:QRIS,Transfer Bank,Cash',
             'notes' => 'nullable|string',
             'voucher_code' => 'nullable|string|exists:vouchers,code',
@@ -31,6 +33,8 @@ class OrderController extends Controller
                 'service_id' => $service->id,
                 'shoe_name' => $item['shoe_name'],
                 'shoe_brand' => $item['shoe_brand'] ?? null,
+                'shoe_size' => $item['shoe_size'] ?? null,
+                'shoe_material' => $item['shoe_material'] ?? null,
                 'quantity' => 1,
                 'price' => $service->price,
             ];
