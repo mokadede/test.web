@@ -110,15 +110,14 @@ class AdminController extends Controller
     {
         $this->checkOwner();
         
-        $ordersPerMonth = Order::selectRaw('strftime("%m", created_at) as month, SUM(total_price) as total_revenue, COUNT(*) as total_orders')
-            ->where('payment_status', 'paid')
-            ->whereRaw('strftime("%Y", created_at) = ?', [date('Y')])
-            ->groupBy('month')
+        $orders = Order::where('payment_status', 'paid')
+            ->whereYear('created_at', date('Y'))
             ->get();
             
         $chartData = array_fill(1, 12, 0);
-        foreach ($ordersPerMonth as $data) {
-            $chartData[(int)$data->month] = $data->total_revenue;
+        foreach ($orders as $order) {
+            $month = (int) $order->created_at->format('m');
+            $chartData[$month] += $order->total_price;
         }
 
         return view('admin.dashboard', compact('chartData'));
