@@ -41,11 +41,17 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <x-input-label :value="__('Layanan')" />
-                                    <select name="items[0][service_id]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                        @foreach($services as $service)
-                                            <option value="{{ $service->id }}" data-price="{{ $service->price }}">{{ $service->name }} - Rp {{ number_format($service->price, 0, ',', '.') }}</option>
-                                        @endforeach
-                                    </select>
+                                    @if($services->count() > 0)
+                                        <select name="items[0][service_id]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                            @foreach($services as $service)
+                                                <option value="{{ $service->id }}" data-price="{{ $service->price }}">{{ $service->name }} - Rp {{ number_format($service->price, 0, ',', '.') }}</option>
+                                            @endforeach
+                                        </select>
+                                    @else
+                                        <div class="mt-1 p-2 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-md text-sm italic">
+                                            Layanan belum tersedia. Silakan hubungi admin.
+                                        </div>
+                                    @endif
                                 </div>
                                 <div>
                                     <x-input-label :value="__('Nama/Tipe Sepatu')" />
@@ -208,9 +214,14 @@
             let itemIndex = 1;
             const container = document.getElementById('itemsContainer');
             const addBtn = document.getElementById('addItemBtn');
-            const servicesOptions = document.querySelector('.item-row select').innerHTML;
+            const selectElement = document.querySelector('.item-row select');
+            const servicesOptions = selectElement ? selectElement.innerHTML : '';
 
             addBtn.addEventListener('click', () => {
+                if (!servicesOptions) {
+                    alert('Tidak dapat menambah item karena layanan belum tersedia.');
+                    return;
+                }
                 const row = document.createElement('div');
                 row.className = 'item-row p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-4 mt-4';
                 row.dataset.index = itemIndex;
