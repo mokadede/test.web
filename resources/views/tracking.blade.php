@@ -250,7 +250,7 @@
 
     <footer class="text-center py-12" style="color: var(--gray)">
         <p class="text-[10px] font-bold uppercase tracking-widest">&copy; {{ date('Y') }} K-CLEAN PREMIUM CARE</p>
-        <p style="margin-top: 8px; font-size: 0.6rem; opacity: 0.3;"><a href="{{ route('login') }}">STAFF ACCESS</a></p>
+        <!-- <p style="margin-top: 8px; font-size: 0.6rem; opacity: 0.3;"><a href="{{ route('login') }}">STAFF ACCESS</a></p> -->
     </footer>
 
 </body>
