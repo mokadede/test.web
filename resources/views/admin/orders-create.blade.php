@@ -158,15 +158,18 @@
 
                     {{-- Total Keseluruhan --}}
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-8">
-                        <div class="p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Total Keseluruhan</h3>
-                            <div class="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        <div class="p-6 bg-indigo-50 dark:bg-gray-900 rounded-xl border border-indigo-100 dark:border-gray-800 shadow-sm transition-colors duration-200">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                Total Keseluruhan
+                            </h3>
+                            <div class="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300 mb-2">
                                 <span>Total Item Sepatu:</span>
                                 <span class="font-bold text-gray-900 dark:text-white" x-text="items.length + ' Pasang'"></span>
                             </div>
-                            <div class="flex justify-between items-center pt-2 border-t border-indigo-200 dark:border-indigo-800">
+                            <div class="flex justify-between items-center pt-3 border-t border-indigo-200 dark:border-gray-700 mt-2">
                                 <span class="text-xl font-bold text-gray-900 dark:text-white">Grand Total:</span>
-                                <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400" x-text="'Rp ' + grandTotal.toLocaleString('id-ID')"></span>
+                                <span class="text-3xl font-black text-indigo-600 dark:text-yellow-400 tracking-tighter" x-text="'Rp ' + grandTotal.toLocaleString('id-ID')"></span>
                             </div>
                         </div>
                     </div>

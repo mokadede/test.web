@@ -44,6 +44,11 @@ class AdminController extends Controller
         }
 
         $orders = $query->get();
+
+        if ($request->ajax()) {
+            return view('admin.partials.orders-table', compact('orders'));
+        }
+
         return view('admin.orders', compact('orders'));
     }
 
@@ -181,6 +186,20 @@ class AdminController extends Controller
         // Actually, "rincian order customer" usually means the list of orders that made up the chart. Let's pass all orders, or paginate.
         // Since it's a dashboard, maybe just recent ones, or all orders in the current year. Let's pass the $orders collection we already queried.
         // We'll pass it as $orders.
+
+        if (request()->ajax()) {
+            return response()->json([
+                'chartData' => array_values($chartData),
+                'summary' => $summary,
+                'summary_formatted' => [
+                    'revenue' => 'Rp ' . number_format($summary['total_revenue'], 0, ',', '.'),
+                    'orders' => $summary['total_orders'] . ' Pesanan',
+                    'top_service' => $summary['top_service'] ?: 'Belum Ada',
+                    'year_text' => request('start_date') || request('end_date') ? '(Filter Aktif)' : 'Tahun ' . $summary['year']
+                ],
+                'html' => view('admin.partials.dashboard-orders', compact('orders'))->render()
+            ]);
+        }
 
         return view('admin.dashboard', compact('chartData', 'summary', 'orders'));
     }
@@ -321,6 +340,18 @@ class AdminController extends Controller
         $this->checkOwner();
         $voucher->delete();
         return back()->with('success', 'Voucher berhasil dihapus.');
+    }
+
+    public function updateVoucher(Request $request, \App\Models\Voucher $voucher)
+    {
+        $this->checkOwner();
+        $request->validate([
+            'code' => 'required|unique:vouchers,code,' . $voucher->id,
+            'discount_amount' => 'required|numeric',
+            'discount_type' => 'required|in:fixed,percent',
+        ]);
+        $voucher->update($request->all());
+        return back()->with('success', 'Voucher berhasil diperbarui.');
     }
 
     public function storeAddOn(Request $request)

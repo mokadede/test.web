@@ -15,224 +15,90 @@
         [x-cloak] { display: none !important; }
     </style>
 
- <div class="py-12">
- <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="py-12" x-data="{ 
+        loading: false,
+        async fetchTable(url) {
+            this.loading = true;
+            try {
+                const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const html = await response.text();
+                document.getElementById('tableContainer').innerHTML = html;
+                // Update browser URL without reload
+                window.history.pushState({}, '', url);
+            } catch (error) {
+                console.error('Failed to fetch orders:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        get hasFilters() {
+            const formData = new FormData(this.$refs.form);
+            return Array.from(formData.values()).some(v => v !== '');
+        },
+        submitFilter() {
+            const formData = new FormData(this.$refs.form);
+            const params = new URLSearchParams(formData).toString();
+            this.fetchTable('{{ route('admin.orders') }}?' + params);
+        },
+        resetFilter() {
+            this.$refs.form.querySelectorAll('input').forEach(i => i.value = '');
+            this.fetchTable('{{ route('admin.orders') }}');
+        }
+    }">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
                 {{ session('success') }}
             </div>
         @endif
 
-        <!-- Filter Tanggal & Search -->
-        <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg" x-data>
-            <form id="filterForm" method="GET" action="{{ route('admin.orders') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:items-end gap-4" x-ref="form">
-                <div class="col-span-1 sm:col-span-2 lg:flex-1">
-                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cari Pesanan</label>
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Kode, Nama, atau Petugas..."
-                        x-on:input.debounce.750ms="$refs.form.submit()"
-                        class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+    <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg relative" x-data="{ open: false, order: {} }">
+        <!-- Inline Filters & Search -->
+        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <form id="filterForm" method="GET" action="{{ route('admin.orders') }}" 
+                class="flex flex-wrap items-center gap-3 flex-1" 
+                x-ref="form"
+                @submit.prevent="submitFilter()">
+                
+                <div class="relative flex-1 min-w-[200px]">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                        placeholder="Cari kode, nama, atau petugas..."
+                        @input.debounce.500ms="submitFilter()"
+                        class="block w-full pl-10 text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
-                <div class="w-full lg:w-48">
-                    <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal</label>
-                    <input type="date" name="start_date" id="start_date" value="{{ request('start_date') }}" 
-                        x-on:change="$refs.form.submit()"
-                        class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+
+                <div class="flex items-center gap-2">
+                    <input type="date" name="start_date" value="{{ request('start_date') }}" 
+                        @change="submitFilter()"
+                        class="text-[11px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-1.5">
+                    <span class="text-gray-400 text-[10px] font-bold uppercase">s/d</span>
+                    <input type="date" name="end_date" value="{{ request('end_date') }}" 
+                        @change="submitFilter()"
+                        class="text-[11px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-1.5">
                 </div>
-                <div class="w-full lg:w-48">
-                    <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sampai Tanggal</label>
-                    <input type="date" name="end_date" id="end_date" value="{{ request('end_date') }}" 
-                        x-on:change="$refs.form.submit()"
-                        class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div class="flex gap-2 w-full lg:w-auto">
-                    <button type="submit" class="flex-1 lg:flex-none px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow transition flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        Cari
-                    </button>
-                    @if(request()->anyFilled(['search', 'start_date', 'end_date']))
-                        <a href="{{ route('admin.orders') }}" class="flex-1 lg:flex-none px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold rounded-md shadow transition text-center">
-                            Reset
-                        </a>
-                    @endif
-                </div>
+
+                <a href="{{ route('admin.orders') }}" 
+                   x-show="hasFilters"
+                   @click.prevent="resetFilter()"
+                   class="px-3 py-1.5 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 text-[10px] font-bold uppercase rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition flex items-center gap-1"
+                   x-cloak>
+                    <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Reset
+                </a>
             </form>
         </div>
 
-    <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg" x-data="{ open: false, order: {} }">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead>
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-10 text-center">Lihat</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'tracking_code', 'sort_order' => request('sort_by') == 'tracking_code' && request('sort_order') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-indigo-600 transition">
-                                Tracking
-                                @if(request('sort_by', 'created_at') == 'tracking_code' || request('sort_by') == 'created_at')
-                                    <svg class="w-3 h-3 {{ request('sort_order', 'desc') == 'asc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                @endif
-                            </a>
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                            <div class="flex items-center gap-2">
-                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'customer_name', 'sort_order' => request('sort_by') == 'customer_name' && request('sort_order') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-indigo-600 transition">
-                                    Pelanggan
-                                    @if(request('sort_by') == 'customer_name')
-                                        <svg class="w-3 h-3 {{ request('sort_order') == 'asc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    @endif
-                                </a>
-                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'estimated_days', 'sort_order' => request('sort_by') == 'estimated_days' && request('sort_order') == 'asc' ? 'desc' : 'asc']) }}" 
-                                   title="Urutkan Deadline"
-                                   class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition {{ request('sort_by') == 'estimated_days' ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'text-gray-400 dark:text-gray-500' }}">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </a>
-                            </div>
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Detail Sepatu</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Layanan</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Pembayaran</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'total_price', 'sort_order' => request('sort_by') == 'total_price' && request('sort_order') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-indigo-600 transition">
-                                Total
-                                @if(request('sort_by') == 'total_price')
-                                    <svg class="w-3 h-3 {{ request('sort_order') == 'asc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                @endif
-                            </a>
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'status', 'sort_order' => request('sort_by') == 'status' && request('sort_order') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-indigo-600 transition">
-                                Status
-                                @if(request('sort_by') == 'status')
-                                    <svg class="w-3 h-3 {{ request('sort_order') == 'asc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                @endif
-                            </a>
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase text-center">Kirim Track ID</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase text-center">Aksi</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase text-center">Petugas</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @foreach($orders as $order)
-                    <tr>
-                        <td class="px-4 py-4 text-sm text-center">
-                            <button @click="open = true; order = {{ $order->toJson() }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            </button>
-                        </td>
-                        <td class="px-4 py-4 text-sm font-mono font-bold text-indigo-600 dark:text-neon">
-                            {{ $order->order_id_formatted }}
-                            <div class="text-[10px] text-gray-400 font-normal">{{ $order->created_at->format('d M Y') }}</div>
-                        </td>
-                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                        <div class="font-semibold">{{ $order->customer_name }}</div>
-                        <div class="text-xs text-gray-500">{{ $order->phone_number }}</div>
-                        @if($order->estimated_days)
-                            @php
-                                $deadlineStatus = $order->deadline_status;
-                                $colorClass = match($deadlineStatus) {
-                                    'danger' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200',
-                                    'warning' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200',
-                                    'safe' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200',
-                                    'completed' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200',
-                                    default => 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200',
-                                };
-                            @endphp
-                            <div class="mt-2">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $colorClass }}">
-                                    ⏱ {{ $order->estimated_days }} Hari
-                                    @if($deadlineStatus === 'danger' && $order->status !== 'completed' && $order->status !== 'cancelled')
-                                        <span class="ml-1">🔥</span>
-                                    @endif
-                                </span>
-                            </div>
-                        @endif
-                    </td>
-                    <td class="px-4 py-4 text-sm text-gray-500">
-                        <div>
-                            @if($order->shoe_brand)
-                                <b>{{ $order->shoe_brand }}</b>
-                            @endif
-                            @if($order->shoe_size)
-                                <span class="text-xs">(Size: {{ $order->shoe_size }})</span>
-                            @endif
-                        </div>
-                        @if($order->shoe_condition)
-                            <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Kondisi: {{ $order->shoe_condition }}</div>
-                        @endif
-                        @if($order->deadline_date)
-                            <div class="text-[10px] text-indigo-500 mt-1 font-medium">
-                                📅 Selesai: {{ $order->deadline_date->format('d M Y') }}
-                            </div>
-                        @endif
-                    </td>
-                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                        <div class="font-semibold">{{ $order->service_name }}</div>
-                        @if($order->service_category)
-                            <div class="text-xs text-gray-400 dark:text-gray-500">{{ $order->service_category }}</div>
-                        @endif
-                        @if($order->additional_fees > 0)
-                            <div class="text-xs text-orange-500 mt-0.5">+ Rp {{ number_format($order->additional_fees, 0, ',', '.') }} tambahan</div>
-                        @endif
-                        @if($order->voucher_code)
-                            <div class="text-green-500 text-xs mt-0.5">Voucher: {{ $order->voucher_code }} (-Rp {{ number_format($order->discount_amount, 0, ',', '.') }})</div>
-                        @endif
-                    </td>
-                    <td class="px-4 py-4 text-sm text-center">
-                        <div class="flex flex-col items-center gap-1">
-                            <span class="text-xs font-semibold text-gray-400">{{ $order->payment_method ?? '-' }}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase w-fit {{ $order->payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $order->payment_status === 'paid' ? 'Lunas' : 'Belum Lunas' }}
-                            </span>
-                        </div>
-                    </td>
-                    <td class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
-                    <td class="px-4 py-4 text-sm text-center">
-                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase border" 
-                              :class="{
-                                  'bg-gray-100 text-gray-800 border-gray-200': '{{ $order->status }}' === 'Waiting',
-                                  'bg-blue-100 text-blue-800 border-blue-200': '{{ $order->status }}' === 'Cleaning',
-                                  'bg-yellow-100 text-yellow-800 border-yellow-200': '{{ $order->status }}' === 'Drying',
-                                  'bg-indigo-100 text-indigo-800 border-indigo-200': '{{ $order->status }}' === 'Ready',
-                                  'bg-green-100 text-green-800 border-green-200': '{{ $order->status }}' === 'Delivered',
-                                  'bg-red-100 text-red-800 border-red-200': '{{ $order->status }}' === 'cancelled'
-                              }">
-                            {{ $order->status }}
-                        </span>
-                    </td>
-                    <td class="px-4 py-4 text-sm">
-                        @if($order->phone_number)
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->phone_number) }}?text={{ urlencode('Halo ' . $order->customer_name . ', pesanan sepatu Anda telah diterima. Kode tracking Anda adalah: ' . $order->tracking_code . '. Silakan cek progresnya di: ' . route('track')) }}" 
-                            target="_blank" 
-                            class="inline-flex items-center justify-center px-3 py-1.5 bg-green-500 border border-transparent rounded-md font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-green-600 active:bg-green-700 transition ease-in-out duration-150">
-                            WhatsApp
-                        </a>
-                        @endif
-                    </td>
-                    <td class="px-4 py-4 text-sm text-center">
-                        <div class="flex items-center justify-center gap-2">
-                            <a href="{{ route('admin.orders.edit', $order) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-500 border border-transparent rounded-md font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-blue-600 active:bg-blue-700 transition ease-in-out duration-150">
-                                Edit
-                            </a>
-                            <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pesanan ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 bg-red-500 border border-transparent rounded-md font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-red-600 active:bg-red-700 transition ease-in-out duration-150">
-                                    Hapus
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                    <td class="px-4 py-4 text-sm text-center">
-                        @if($order->created_by)
-                            <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-tight">{{ $order->created_by }}</span>
-                        @else
-                            <span class="text-[10px] text-gray-300 dark:text-gray-600">-</span>
-                        @endif
-                    </td>
-                </tr>
-                @endforeach
- </tbody>
- </table>
+        <!-- Loading Overlay -->
+        <div x-show="loading" x-cloak class="absolute inset-0 bg-white/30 dark:bg-gray-800/30 z-10 flex items-center justify-center rounded-lg backdrop-blur-[1px]">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        </div>
+
+        <div class="overflow-x-auto" id="tableContainer">
+            @include('admin.partials.orders-table')
+        </div>
         <!-- Modal Detail Pesanan -->
         <div x-show="open" 
              class="fixed inset-0 z-50 overflow-y-auto" 
