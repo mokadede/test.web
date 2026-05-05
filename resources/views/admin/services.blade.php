@@ -60,44 +60,53 @@
                             <span class="text-xs font-normal text-gray-400">({{ $catServices->count() }} layanan)</span>
                         </h3>
 
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto -mx-6 sm:mx-0">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead>
                                     <tr>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estimasi</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                        <th class="px-6 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Detail Layanan (Edit)</th>
+                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     @foreach($catServices as $service)
                                         <tr>
-                                            <td class="px-3 py-3">
-                                                <form method="POST" action="{{ route('admin.services.update', $service) }}" class="flex flex-wrap gap-2 items-center" id="form-service-{{ $service->id }}">
+                                            <td class="px-6 sm:px-3 py-4">
+                                                <form method="POST" action="{{ route('admin.services.update', $service) }}" class="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-2 items-start sm:items-center" id="form-service-{{ $service->id }}">
                                                     @csrf @method('PATCH')
                                                     <input type="hidden" name="category" value="{{ $service->category }}">
-                                                    <x-text-input name="name" value="{{ $service->name }}" class="text-sm w-48" />
-                                            </td>
-                                            <td class="px-3 py-3">
-                                                <x-text-input name="price" value="{{ $service->price }}" type="number" class="text-sm w-24" />
-                                            </td>
-                                            <td class="px-3 py-3">
-                                                <x-text-input name="estimated_days" value="{{ $service->estimated_days }}" class="text-sm w-28" placeholder="-" />
-                                            </td>
-                                            <td class="px-3 py-3">
-                                                <x-text-input name="description" value="{{ $service->description }}" class="text-sm w-48" placeholder="Deskripsi" />
-                                            </td>
-                                            <td class="px-3 py-3">
-                                                <div class="flex gap-2 items-center">
-                                                    <x-secondary-button type="submit" class="text-xs !py-1 !px-2">Save</x-secondary-button>
+                                                    <div class="w-full sm:w-auto">
+                                                        <x-input-label value="Nama" class="sm:hidden text-[10px]" />
+                                                        <x-text-input name="name" value="{{ $service->name }}" class="text-sm w-full sm:w-48" />
+                                                    </div>
+                                                    <div class="w-full sm:w-auto">
+                                                        <x-input-label value="Harga" class="sm:hidden text-[10px]" />
+                                                        <x-text-input name="price" value="{{ $service->price }}" type="number" class="text-sm w-full sm:w-24" />
+                                                    </div>
+                                                    <div class="w-full sm:w-auto">
+                                                        <x-input-label value="Estimasi" class="sm:hidden text-[10px]" />
+                                                        <x-text-input name="estimated_days" value="{{ $service->estimated_days }}" class="text-sm w-full sm:w-28" placeholder="-" />
+                                                    </div>
+                                                    <div class="w-full sm:w-auto">
+                                                        <x-input-label value="Deskripsi" class="sm:hidden text-[10px]" />
+                                                        <x-text-input name="description" value="{{ $service->description }}" class="text-sm w-full sm:w-48" placeholder="Deskripsi" />
+                                                    </div>
+                                                    <div class="flex gap-2 items-center w-full sm:w-auto mt-2 sm:mt-0">
+                                                        <x-secondary-button type="submit" class="flex-1 sm:flex-none text-xs !py-2 !px-4 h-9">Save</x-secondary-button>
+                                                        <button type="button" 
+                                                                onclick="if(confirm('Hapus layanan ini?')) document.getElementById('delete-service-{{ $service->id }}').submit()"
+                                                                class="flex-1 sm:hidden px-4 py-2 bg-red-100 text-red-600 rounded text-xs font-semibold h-9">Hapus</button>
+                                                    </div>
                                                 </form>
+                                                <form id="delete-service-{{ $service->id }}" method="POST" action="{{ route('admin.services.destroy', $service) }}" class="hidden">
+                                                    @csrf @method('DELETE')
+                                                </form>
+                                            </td>
+                                            <td class="px-3 py-4 hidden sm:table-cell">
                                                 <form method="POST" action="{{ route('admin.services.destroy', $service) }}" onsubmit="return confirm('Hapus layanan ini?')">
                                                     @csrf @method('DELETE')
                                                     <button type="submit" class="px-2 py-1 bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-800 rounded text-xs font-semibold transition">Hapus</button>
                                                 </form>
-                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -133,35 +142,44 @@
                     </div>
                 </form>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto -mx-6 sm:mx-0">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Harga</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Detail Add-On (Edit)</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($add_ons as $add_on)
                                 <tr>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <form method="POST" action="{{ route('admin.add_ons.update', $add_on) }}" class="flex items-center" id="form-addon-{{ $add_on->id }}">
+                                    <td class="px-6 py-4">
+                                        <form method="POST" action="{{ route('admin.add_ons.update', $add_on) }}" class="flex flex-col sm:flex-row gap-4 sm:gap-2 items-start sm:items-center" id="form-addon-{{ $add_on->id }}">
                                             @csrf @method('PATCH')
-                                            <x-text-input name="name" value="{{ $add_on->name }}" class="text-sm w-full sm:w-64" />
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <x-text-input name="price" value="{{ $add_on->price }}" type="number" class="text-sm w-32" />
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-right">
-                                        <div class="flex justify-end gap-2 items-center">
-                                            <x-secondary-button type="submit" class="text-xs !py-1 !px-2">Save</x-secondary-button>
+                                            <div class="w-full sm:w-64">
+                                                <x-input-label value="Nama Add-On" class="sm:hidden text-[10px]" />
+                                                <x-text-input name="name" value="{{ $add_on->name }}" class="text-sm w-full" />
+                                            </div>
+                                            <div class="w-full sm:w-32">
+                                                <x-input-label value="Harga" class="sm:hidden text-[10px]" />
+                                                <x-text-input name="price" value="{{ $add_on->price }}" type="number" class="text-sm w-full" />
+                                            </div>
+                                            <div class="flex gap-2 items-center w-full sm:w-auto mt-2 sm:mt-0">
+                                                <x-secondary-button type="submit" class="flex-1 sm:flex-none text-xs !py-2 !px-4 h-9">Save</x-secondary-button>
+                                                <button type="button" 
+                                                        onclick="if(confirm('Hapus add-on ini?')) document.getElementById('delete-addon-{{ $add_on->id }}').submit()"
+                                                        class="flex-1 sm:hidden px-4 py-2 bg-red-100 text-red-600 rounded text-xs font-semibold h-9">Hapus</button>
+                                            </div>
                                         </form>
+                                        <form id="delete-addon-{{ $add_on->id }}" method="POST" action="{{ route('admin.add_ons.destroy', $add_on) }}" class="hidden">
+                                            @csrf @method('DELETE')
+                                        </form>
+                                    </td>
+                                    <td class="px-4 py-4 text-right hidden sm:table-cell">
                                         <form method="POST" action="{{ route('admin.add_ons.destroy', $add_on) }}" onsubmit="return confirm('Hapus add-on ini?')">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="px-2 py-1 bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-800 rounded text-xs font-semibold transition">Hapus</button>
                                         </form>
-                                        </div>
                                     </td>
                                 </tr>
                             @empty

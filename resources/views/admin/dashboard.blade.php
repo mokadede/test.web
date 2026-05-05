@@ -1,11 +1,11 @@
 <x-app-layout title="Dashboard">
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Dashboard Pembukuan (Owner)') }}
             </h2>
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-md shadow flex items-center gap-2 transition">
+            <div x-data="{ open: false }" class="relative w-full sm:w-auto">
+                <button @click="open = !open" class="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-md shadow flex items-center justify-center gap-2 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     Export Excel
                     <svg class="w-3 h-3 ml-1" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -104,11 +104,13 @@
                             @endif
                         </h4>
                         
-                        <form method="GET" action="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
-                            <input type="date" name="start_date" value="{{ request('start_date') }}" class="text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" onchange="this.form.submit()">
-                            <span class="text-gray-500 text-sm">s/d</span>
-                            <input type="date" name="end_date" value="{{ request('end_date') }}" class="text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" onchange="this.form.submit()">
-                            <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition text-xs font-semibold flex items-center gap-1">
+                        <form method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-wrap items-center gap-2">
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <input type="date" name="start_date" value="{{ request('start_date') }}" class="flex-1 sm:w-auto text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" onchange="this.form.submit()">
+                                <span class="text-gray-500 text-sm">s/d</span>
+                                <input type="date" name="end_date" value="{{ request('end_date') }}" class="flex-1 sm:w-auto text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" onchange="this.form.submit()">
+                            </div>
+                            <a href="{{ route('admin.dashboard') }}" class="w-full sm:w-auto px-3 py-1.5 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition text-xs font-semibold flex items-center justify-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                 Reset
                             </a>
