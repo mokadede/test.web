@@ -8,9 +8,42 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function orders()
+    public function orders(Request $request)
     {
-        $orders = Order::with('user', 'items.service')->latest()->get();
+        $query = Order::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'LIKE', "%{$search}%")
+                  ->orWhere('customer_name', 'LIKE', "%{$search}%")
+                  ->orWhere('created_by', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Date Filter
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Allowed columns to avoid SQL injection
+        $allowedSorts = ['order_number', 'customer_name', 'estimated_days', 'total_price', 'status', 'created_at'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            $query->latest();
+        }
+
+        $orders = $query->get();
         return view('admin.orders', compact('orders'));
     }
 
@@ -18,7 +51,8 @@ class AdminController extends Controller
     {
         $this->checkOwner();
         $services = Service::all();
-        return view('admin.services', compact('services'));
+        $add_ons = \App\Models\AddOn::all();
+        return view('admin.services', compact('services', 'add_ons'));
     }
 
     public function employees()
@@ -44,7 +78,6 @@ class AdminController extends Controller
 
     public function editOrder(Order $order)
     {
-        $order->load('items.service');
         $services = Service::all();
         return view('admin.orders-edit', compact('order', 'services'));
     }
@@ -52,50 +85,38 @@ class AdminController extends Controller
     public function updateOrder(Request $request, Order $order)
     {
         $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'shoe_brand' => 'nullable|string|max:255',
+            'shoe_size' => 'nullable|string|max:50',
+            'shoe_condition' => 'nullable|string|max:100',
+            'service_name' => 'required|string|max:255',
+            'additional_fees' => 'nullable|integer|min:0',
+            'total_price' => 'required|integer|min:0',
+            'payment_method' => 'nullable|string',
             'payment_status' => 'required|in:unpaid,paid',
             'status' => 'required|string',
-            'items' => 'required|array',
+            'notes' => 'nullable|string',
         ]);
 
+        // Auto-set category and estimated_days from service
+        $service = Service::where('name', $request->service_name)->first();
+
         $order->update([
+            'customer_name' => $request->customer_name,
+            'phone_number' => $request->phone_number,
+            'shoe_brand' => $request->shoe_brand,
+            'shoe_size' => $request->shoe_size,
+            'shoe_condition' => $request->shoe_condition,
+            'service_category' => $service ? $service->category : $request->service_category,
+            'service_name' => $request->service_name,
+            'additional_fees' => $request->additional_fees ?? 0,
+            'total_price' => $request->total_price,
+            'estimated_days' => $service ? $service->estimated_days : $order->estimated_days,
+            'payment_method' => $request->payment_method,
             'payment_status' => $request->payment_status,
             'status' => $request->status,
-        ]);
-
-        foreach ($request->items as $id => $itemData) {
-            $item = \App\Models\OrderItem::findOrFail($id);
-            if ($item->order_id == $order->id) {
-                $item->update([
-                    'service_id' => $itemData['service_id'],
-                    'shoe_name' => $itemData['shoe_name'],
-                    'shoe_brand' => $itemData['shoe_brand'] ?? null,
-                    'shoe_size' => $itemData['shoe_size'] ?? null,
-                    'shoe_material' => $itemData['shoe_material'] ?? null,
-                ]);
-            }
-        }
-
-        $totalPrice = 0;
-        foreach ($order->items()->get() as $item) {
-            $totalPrice += $item->service->price;
-        }
-        
-        $discountAmount = 0;
-        if ($order->voucher_code) {
-            $voucher = \App\Models\Voucher::where('code', $order->voucher_code)->first();
-            if ($voucher) {
-                if ($voucher->discount_type == 'percent') {
-                    $discountAmount = $totalPrice * ($voucher->discount_amount / 100);
-                } else {
-                    $discountAmount = $voucher->discount_amount;
-                }
-                if ($discountAmount > $totalPrice) $discountAmount = $totalPrice;
-            }
-        }
-
-        $order->update([
-            'total_price' => $totalPrice - $discountAmount,
-            'discount_amount' => $discountAmount
+            'notes' => $request->notes,
         ]);
 
         return redirect()->route('admin.orders')->with('success', 'Data pesanan berhasil diperbarui.');
@@ -106,68 +127,114 @@ class AdminController extends Controller
         abort_if(auth()->user()->role !== 'owner', 403, 'Akses ditolak. Hanya untuk Owner.');
     }
 
-    public function dashboard()
+    public function dashboard(\Illuminate\Http\Request $request)
     {
         $this->checkOwner();
         
-        $orders = Order::where('payment_status', 'paid')
-            ->whereYear('created_at', date('Y'))
-            ->get();
+        $currentYear = date('Y');
+        $query = Order::where('payment_status', 'paid');
+
+        // Apply date filters if provided, otherwise default to current year
+        if ($request->filled('start_date') || $request->filled('end_date')) {
+            if ($request->filled('start_date')) {
+                $query->whereDate('created_at', '>=', $request->start_date);
+            }
+            if ($request->filled('end_date')) {
+                $query->whereDate('created_at', '<=', $request->end_date);
+            }
+        } else {
+            $query->whereYear('created_at', $currentYear);
+        }
+
+        $orders = $query->get();
             
         $chartData = array_fill(1, 12, 0);
+        $totalRevenue = 0;
+        $totalPaidOrders = $orders->count();
+        $serviceCounts = [];
+
         foreach ($orders as $order) {
             $month = (int) $order->created_at->format('m');
             $chartData[$month] += $order->total_price;
+            $totalRevenue += $order->total_price;
+
+            if ($order->service_name) {
+                if (!isset($serviceCounts[$order->service_name])) {
+                    $serviceCounts[$order->service_name] = 0;
+                }
+                $serviceCounts[$order->service_name]++;
+            }
         }
 
-        return view('admin.dashboard', compact('chartData'));
+        arsort($serviceCounts);
+        $topService = key($serviceCounts);
+
+        $summary = [
+            'total_revenue' => $totalRevenue,
+            'total_orders' => $totalPaidOrders,
+            'top_service' => $topService,
+            'year' => $currentYear
+        ];
+
+        // Sort orders descending by created_at for the table
+        $recentOrders = $orders->sortByDesc('created_at')->take(10); // Show latest 10 or all? Let's just pass all $orders and let view handle it or just recent 10. Let's pass $recentOrders.
+        // Actually, "rincian order customer" usually means the list of orders that made up the chart. Let's pass all orders, or paginate.
+        // Since it's a dashboard, maybe just recent ones, or all orders in the current year. Let's pass the $orders collection we already queried.
+        // We'll pass it as $orders.
+
+        return view('admin.dashboard', compact('chartData', 'summary', 'orders'));
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
         $this->checkOwner();
-        $orders = Order::with('user', 'items.service')->where('payment_status', 'paid')->get();
-        
-        $filename = "orders_export_" . date('Y-m-d') . ".csv";
-        $handle = fopen('php://temp', 'w+');
-        fputcsv($handle, ['Tracking Code', 'Pelanggan', 'Layanan', 'Total Harga', 'Tanggal', 'Metode Pembayaran']);
 
-        foreach($orders as $order) {
-            $services = $order->items->map(function($item) {
-                return $item->shoe_name . ' (' . $item->service->name . ')';
-            })->implode(', ');
-            
-            fputcsv($handle, [
-                $order->tracking_code,
-                $order->user->name,
-                $services,
-                $order->total_price,
-                $order->created_at->format('Y-m-d'),
-                $order->payment_method
-            ]);
-        }
-        rewind($handle);
-        $content = stream_get_contents($handle);
-        fclose($handle);
+        $period = $request->get('period');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
 
-        return response($content)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        // Generate a descriptive filename
+        $label = match($period) {
+            '7days' => '7_hari_terakhir',
+            '30days' => '30_hari_terakhir',
+            'this_month' => 'bulan_ini',
+            'last_month' => 'bulan_lalu',
+            default => ($startDate && $endDate) ? "{$startDate}_sd_{$endDate}" : 'semua_data',
+        };
+
+        $filename = "K-Clean_Laporan_{$label}_" . date('Ymd_His') . ".xlsx";
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\OrdersExport($startDate, $endDate, $period),
+            $filename
+        );
     }
 
     public function storeService(Request $request)
     {
         $this->checkOwner();
-        $request->validate(['name' => 'required', 'price' => 'required|numeric']);
-        Service::create($request->all());
+        $request->validate([
+            'category' => 'required|string',
+            'name' => 'required|string',
+            'price' => 'required|numeric',
+            'estimated_days' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+        ]);
+        Service::create($request->only(['category', 'name', 'price', 'estimated_days', 'description']));
         return back()->with('success', 'Layanan berhasil ditambahkan.');
     }
 
     public function updateService(Request $request, Service $service)
     {
         $this->checkOwner();
-        $request->validate(['name' => 'required', 'price' => 'required|numeric']);
-        $service->update($request->all());
+        $request->validate([
+            'category' => 'required|string',
+            'name' => 'required|string',
+            'price' => 'required|numeric',
+            'estimated_days' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+        ]);
+        $service->update($request->only(['category', 'name', 'price', 'estimated_days', 'description']));
         return back()->with('success', 'Layanan berhasil diperbarui.');
     }
 
@@ -205,6 +272,38 @@ class AdminController extends Controller
         return back()->with('success', 'Karyawan berhasil dihapus.');
     }
 
+    public function updateEmployee(Request $request, \App\Models\User $user)
+    {
+        $this->checkOwner();
+        if ($user->role !== 'karyawan') {
+            return back()->with('error', 'Hanya dapat mengedit karyawan.');
+        }
+
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        ];
+
+        if ($request->filled('password')) {
+            $rules['password'] = 'string|min:8';
+        }
+
+        $request->validate($rules);
+
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        $user->update($data);
+
+        return back()->with('success', 'Karyawan berhasil diperbarui.');
+    }
+
     public function storeVoucher(Request $request)
     {
         $this->checkOwner();
@@ -222,5 +321,34 @@ class AdminController extends Controller
         $this->checkOwner();
         $voucher->delete();
         return back()->with('success', 'Voucher berhasil dihapus.');
+    }
+
+    public function storeAddOn(Request $request)
+    {
+        $this->checkOwner();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+        ]);
+        \App\Models\AddOn::create($request->only(['name', 'price']));
+        return back()->with('success', 'Add-on berhasil ditambahkan.');
+    }
+
+    public function updateAddOn(Request $request, \App\Models\AddOn $add_on)
+    {
+        $this->checkOwner();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+        ]);
+        $add_on->update($request->only(['name', 'price']));
+        return back()->with('success', 'Add-on berhasil diperbarui.');
+    }
+
+    public function destroyAddOn(\App\Models\AddOn $add_on)
+    {
+        $this->checkOwner();
+        $add_on->delete();
+        return back()->with('success', 'Add-on berhasil dihapus.');
     }
 }

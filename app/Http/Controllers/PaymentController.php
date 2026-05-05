@@ -16,12 +16,12 @@ class PaymentController extends Controller
     public function createInvoice(Order $order)
     {
         $params = [
-            'external_id' => 'ORDER-' . $order->tracking_code . '-' . time(),
+            'external_id' => 'ORDER-' . $order->order_number . '-' . time(),
             'amount' => (int) $order->total_price,
-            'description' => 'Pembayaran Shoe Laundry #' . $order->tracking_code,
-            'payer_email' => $order->user->email,
-            'success_redirect_url' => route('customer.dashboard'),
-            'failure_redirect_url' => route('customer.dashboard'),
+            'description' => 'Pembayaran Shoe Laundry #' . $order->order_id_formatted,
+            'payer_email' => 'customer@shoelaundry.com',
+            'success_redirect_url' => route('admin.orders'),
+            'failure_redirect_url' => route('admin.orders'),
             'currency' => 'IDR',
         ];
 
@@ -30,7 +30,6 @@ class PaymentController extends Controller
             
             $order->update([
                 'external_id' => $invoice['id'],
-                // Save the invoice URL if you want to redirect the user later
             ]);
 
             return redirect($invoice['invoice_url']);
@@ -49,12 +48,11 @@ class PaymentController extends Controller
         $external_id = $request->external_id;
         $status = $request->status;
 
-        // Extract tracking code: ORDER-ABC12-1714545678 -> ABC12
-        // We split by '-' and take the middle part
+        // Extract order number: ORDER-ABC12-1714545678 -> ABC12
         $parts = explode('-', $external_id);
-        $tracking_code = $parts[1] ?? null;
+        $order_number = $parts[1] ?? null;
 
-        $order = Order::where('tracking_code', $tracking_code)->first();
+        $order = Order::where('order_number', $order_number)->first();
 
         if ($order) {
             if ($status === 'PAID' || $status === 'SETTLED') {

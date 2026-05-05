@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Manajemen Voucher">
  <x-slot name="header">
  <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
  {{ __('Manajemen Voucher Diskon') }}
@@ -37,7 +37,7 @@
  </span>
  <form method="POST" action="{{ route('admin.vouchers.destroy', $voucher) }}">
  @csrf @method('DELETE')
- <button type="submit" class="text-red-500 text-sm hover:underline">Hapus</button>
+ <button type="submit" class="px-2 py-1 bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-800 rounded text-xs font-semibold transition">Hapus</button>
  </form>
  </li>
  @endforeach

@@ -21,24 +21,27 @@ class TrackingController extends Controller
     public function search(Request $request)
     {
         $request->validate([
-            'tracking_code' => 'required|string|max:5',
-            'whatsapp_last_4' => 'required|string|size:4',
+            'tracking_code' => 'required|string', // This will now be our Order ID (KC-XXXXX)
+            'phone_last_4' => 'required|string|size:4',
         ]);
 
-        $order = Order::with(['items.service', 'user'])
-            ->where('tracking_code', strtoupper($request->tracking_code))
-            ->first();
+        $query = strtoupper($request->tracking_code);
+        
+        // Remove 'KC-' prefix if user entered it
+        $cleanId = str_replace('KC-', '', $query);
 
-        // Verify the last 4 digits of the WhatsApp number
-        if ($order && substr($order->user->whatsapp, -4) !== $request->whatsapp_last_4) {
-            $order = null;
+        $orders = Order::where('order_number', $cleanId)->get();
+
+        // Verify the last 4 digits of the phone number using the first order found
+        if ($orders->isNotEmpty() && substr($orders->first()->phone_number, -4) !== $request->phone_last_4) {
+            $orders = collect();
         }
 
         return view('tracking', [
-            'order' => $order,
+            'orders' => $orders,
             'searched' => true,
-            'query' => strtoupper($request->tracking_code),
-            'whatsapp_query' => $request->whatsapp_last_4,
+            'query' => $query,
+            'phone_query' => $request->phone_last_4,
         ]);
     }
 }

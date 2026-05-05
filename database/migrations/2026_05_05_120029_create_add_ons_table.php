@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('services', function (Blueprint $table) {
+        Schema::create('add_ons', function (Blueprint $table) {
             $table->id();
-            $table->string('category')->default('Cleaning');
             $table->string('name');
-            $table->text('description')->nullable();
-            $table->integer('price');
-            $table->string('estimated_days')->nullable(); // e.g. "5-10 hari", "Same Day", "14 hari"
+            $table->integer('price')->default(0);
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('services');
+        Schema::dropIfExists('add_ons');
     }
 };

@@ -4,8 +4,9 @@
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1">
  <meta name="csrf-token" content="{{ csrf_token() }}">
+ <link rel="icon" href="{{ asset('images/favicon.png') }}">
 
- <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ $title ?? (View::hasSection('title') ? View::getSection('title') : 'Dashboard') }} — {{ config('app.name', 'K-Clean') }}</title>
 
  <!-- Fonts -->
  <link rel="preconnect" href="https://fonts.bunny.net">
@@ -14,9 +15,18 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <x-theme-script />
-    </head>
- <body class="font-sans antialiased">
- <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <style>
+        body {
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        /* Smooth transitions for theme-affected elements */
+        nav, div, header, main, table, td, th, input, select, textarea, button {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-900 dark:text-gray-100">
+    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
  @include('layouts.navigation')
 
  <!-- Page Heading -->

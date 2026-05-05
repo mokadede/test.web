@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>K-Clean — Perawatan Sepatu Premium di Bandung</title>
     <meta name="description" content="Layanan perawatan sepatu premium di Bandung. Deep Clean, Unyellowing, Repaint oleh tim ahli.">
+    <link rel="icon" href="{{ asset('images/favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -27,29 +28,55 @@
             --gray: #555555;
             --white: #111111;
         }
+        /* Fix readability for neon yellow in day mode */
+        html:not(.dark) .nav-logo,
+        html:not(.dark) .hero h1 span,
+        html:not(.dark) .hero-badge,
+        html:not(.dark) .hero-stat-num,
+        html:not(.dark) .section-label,
+        html:not(.dark) .card:not(:hover) .card-icon svg:not([style*="stroke:#000"]),
+        html:not(.dark) .card-price,
+        html:not(.dark) [style*="color: var(--neon)"],
+        html:not(.dark) [style*="color: #FEFE01"],
+        html:not(.dark) .text-neon {
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+        html:not(.dark) .card:not(:hover) .card-icon svg:not([style*="stroke:#000"]) {
+            filter: drop-shadow(0px 0px 1px #000) drop-shadow(0px 0px 1px #000);
+        }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', sans-serif; background: var(--dark); color: var(--white); overflow-x: hidden; }
-        a { text-decoration: none; color: inherit; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--dark); 
+            color: var(--white); 
+            overflow-x: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        /* Smooth transitions for all theme-affected elements */
+        .card, .nav, .footer, section, div, p, h1, h2, h3, span, button, input, textarea {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, text-shadow 0.5s ease;
+        }
+        a { text-decoration: none; color: inherit; transition: color 0.3s; }
 
-        /* NAV */
-        .nav { position: fixed; top: 0; width: 100%; z-index: 100; background: rgba(var(--dark-rgb, 8,8,8),0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(128,128,128,0.2); }
+        /* NAV (Always Dark) */
+        .nav { position: fixed; top: 0; width: 100%; z-index: 100; background: #080808; border-bottom: 1px solid rgba(128,128,128,0.2); }
         .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 72px; }
         .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; color: var(--neon); }
         .nav-logo-icon { width: 36px; height: 36px; background: var(--neon); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         .nav-logo-icon svg { width: 20px; height: 20px; }
         .nav-links { display: flex; align-items: center; gap: 2rem; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-        .nav-links a { color: var(--white); transition: color 0.3s; }
-        .nav-links a:hover { color: var(--neon); }
+        .nav-links a { color: #f0f0f0 !important; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--neon) !important; }
         .nav-cta { padding: 10px 24px; background: var(--neon); color: #000; font-weight: 800; border-radius: 6px; font-size: 0.8rem; letter-spacing: 1px; transition: all 0.3s; }
         .nav-cta:hover { background: #fff; color: #000; box-shadow: 0 0 20px rgba(254,254,1,0.4); }
         .hamburger { display: none; background: none; border: none; cursor: pointer; }
         .hamburger svg { width: 28px; height: 28px; stroke: var(--neon); }
-        .theme-toggle-btn { background: none; border: none; cursor: pointer; color: var(--white); display: flex; align-items: center; justify-content: center; }
-        .theme-toggle-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
-        html.dark .sun-icon { display: block; }
-        html.dark .moon-icon { display: none; }
-        html:not(.dark) .sun-icon { display: none; }
-        html:not(.dark) .moon-icon { display: block; }
+        .theme-toggle-btn { background: none; border: none; cursor: pointer; color: #f0f0f0 !important; display: flex; align-items: center; justify-content: center; position: relative; width: 24px; height: 24px; }
+        .theme-toggle-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; position: absolute; top: 0; left: 0; transition: opacity 0.5s ease, transform 0.5s ease; }
+        html.dark .sun-icon { opacity: 1; transform: rotate(0deg); }
+        html.dark .moon-icon { opacity: 0; transform: rotate(90deg); }
+        html:not(.dark) .sun-icon { opacity: 0; transform: rotate(-90deg); }
+        html:not(.dark) .moon-icon { opacity: 1; transform: rotate(0deg); }
         @media (max-width: 768px) {
             .nav-links { 
                 display: none; 
@@ -162,14 +189,9 @@
             <a href="#services">Layanan</a>
             <a href="#process">Proses</a>
             <a href="{{ route('track') }}">Lacak Pesanan</a>
-            @if (Route::has('login'))
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="nav-cta">Dashboard</a>
-                @else
-                    <a href="{{ route('login') }}">Log In</a>
-                    <a href="{{ route('register') }}" class="nav-cta" style="color: black;">Daftar</a>
-                @endauth
-            @endif
+            @auth
+                <a href="{{ url('/dashboard') }}" class="nav-cta">Dashboard</a>
+            @endauth
         </div>
         <div style="display: flex; gap: 1rem; align-items: center;">
             <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">
@@ -190,7 +212,7 @@
         <h1>Perawatan Sepatu <span>Premium di Bandung</span></h1>
         <p class="hero-desc">Kembalikan tampilan sepatu favorit Anda seperti baru. Tim ahli dengan teknologi pembersihan terkini — cepat, bersih, dan terjamin.</p>
         <div class="hero-buttons">
-            <a href="{{ Route::has('register') ? route('register') : '#' }}" class="btn-primary">BOOKING SEKARANG</a>
+            <a href="https://wa.me/682116878685?text={{ urlencode('Halo K-Clean, saya mau booking layanan cuci sepatu.') }}" target="_blank" class="btn-primary">BOOKING SEKARANG</a>
             <a href="#services" class="btn-outline">Lihat Layanan</a>
         </div>
         <div class="hero-stats">
@@ -224,7 +246,7 @@
                 <h3>Unyellowing</h3>
                 <p>Proses khusus menghilangkan noda kuning pada midsole yang teroksidasi. Warna putih cemerlang kembali.</p>
                 <div class="card-price">Mulai Rp 75.000</div>
-                <a href="{{ Route::has('register') ? route('register') : '#' }}" class="card-link">Book Sekarang <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+                <a href="https://wa.me/682116878685?text={{ urlencode('Halo K-Clean, saya mau booking layanan Unyellowing.') }}" target="_blank" class="card-link">Book Sekarang <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
             </div>
             <div class="card featured">
                 <div class="card-badge">Paling Populer</div>
@@ -232,14 +254,14 @@
                 <h3>Deep Clean</h3>
                 <p>Pencucian menyeluruh untuk Upper, Midsole, Outsole, dan Insole. Cocok untuk perawatan rutin bulanan.</p>
                 <div class="card-price">Mulai Rp 50.000</div>
-                <a href="{{ Route::has('register') ? route('register') : '#' }}" class="card-link">Book Sekarang <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+                <a href="https://wa.me/682116878685?text={{ urlencode('Halo K-Clean, saya mau booking layanan Deep Clean.') }}" target="_blank" class="card-link">Book Sekarang <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
             </div>
             <div class="card">
                 <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"></svg></div>
                 <h3>Repaint</h3>
                 <p>Pengecatan ulang sepatu pudar atau kusam. Menggunakan cat khusus yang tahan lama dan fleksibel.</p>
                 <div class="card-price">Mulai Rp 150.000</div>
-                <a href="{{ Route::has('register') ? route('register') : '#' }}" class="card-link">Book Sekarang <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+                <a href="https://wa.me/682116878685?text={{ urlencode('Halo K-Clean, saya mau booking layanan Repaint.') }}" target="_blank" class="card-link">Book Sekarang <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
             </div>
         </div>
     </div>
@@ -261,6 +283,7 @@
 <!-- FOOTER -->
 <footer class="footer">
     <p>© {{ date('Y') }} K-Clean Bandung. All Rights Reserved.</p>
+    <p style="margin-top: 8px; font-size: 0.65rem; opacity: 0.15;"><a href="{{ route('login') }}" style="color: inherit; text-decoration: none;">Staff</a></p>
 </footer>
 
 <!-- WHATSAPP FAB -->

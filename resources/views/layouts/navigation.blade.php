@@ -12,24 +12,29 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                    @if(auth()->user()->role === 'owner')
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" wire:navigate>
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                    @endif
                     
                     @if(in_array(auth()->user()->role, ['owner', 'karyawan']))
-                        <x-nav-link :href="route('admin.orders')" :active="request()->routeIs('admin.orders')">
+                        <x-nav-link :href="route('admin.orders')" :active="request()->routeIs('admin.orders')" wire:navigate>
                             {{ __('Pesanan') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.orders.create')" :active="request()->routeIs('admin.orders.create')" wire:navigate>
+                            {{ __('+ Pesanan Baru') }}
                         </x-nav-link>
                     @endif
 
                     @if(auth()->user()->role === 'owner')
-                        <x-nav-link :href="route('admin.services')" :active="request()->routeIs('admin.services')">
+                        <x-nav-link :href="route('admin.services')" :active="request()->routeIs('admin.services')" wire:navigate>
                             {{ __('Layanan') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.employees')" :active="request()->routeIs('admin.employees')">
+                        <x-nav-link :href="route('admin.employees')" :active="request()->routeIs('admin.employees')" wire:navigate>
                             {{ __('Karyawan') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.vouchers')" :active="request()->routeIs('admin.vouchers')">
+                        <x-nav-link :href="route('admin.vouchers')" :active="request()->routeIs('admin.vouchers')" wire:navigate>
                             {{ __('Voucher') }}
                         </x-nav-link>
                     @endif
@@ -53,7 +58,7 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
+                        <x-dropdown-link :href="route('profile.edit')" wire:navigate>
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
@@ -86,9 +91,32 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
+            @if(auth()->user()->role === 'owner')
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" wire:navigate>
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if(in_array(auth()->user()->role, ['owner', 'karyawan']))
+                <x-responsive-nav-link :href="route('admin.orders')" :active="request()->routeIs('admin.orders')" wire:navigate>
+                    {{ __('Pesanan') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.orders.create')" :active="request()->routeIs('admin.orders.create')" wire:navigate>
+                    {{ __('+ Pesanan Baru') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if(auth()->user()->role === 'owner')
+                <x-responsive-nav-link :href="route('admin.services')" :active="request()->routeIs('admin.services')" wire:navigate>
+                    {{ __('Layanan') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.employees')" :active="request()->routeIs('admin.employees')" wire:navigate>
+                    {{ __('Karyawan') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.vouchers')" :active="request()->routeIs('admin.vouchers')" wire:navigate>
+                    {{ __('Voucher') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -99,7 +127,7 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
+                <x-responsive-nav-link :href="route('profile.edit')" wire:navigate>
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 

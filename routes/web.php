@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TrackingController;
@@ -21,25 +20,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         if (auth()->user()->role === 'owner') {
             return redirect()->route('admin.dashboard');
         }
-        if (auth()->user()->role === 'karyawan') {
-            return redirect()->route('admin.orders');
-        }
-        return redirect()->route('customer.dashboard');
+        // Karyawan dan semua role lainnya ke halaman pesanan
+        return redirect()->route('admin.orders');
     })->name('dashboard');
-
-    Route::get('/customer/dashboard', [CustomerController::class, 'index'])->name('customer.dashboard');
-    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 
     Route::middleware('is_admin')->group(function () {
         // Real admin dashboard for graph & export
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/admin/orders/export', [AdminController::class, 'exportExcel'])->name('admin.orders.export');
 
-        // Karyawan & Owner
+        // Karyawan & Owner - Order Management
         Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
+        Route::get('/admin/orders/create', function () {
+            $services = \App\Models\Service::all();
+            $add_ons = \App\Models\AddOn::all();
+            return view('admin.orders-create', compact('services', 'add_ons'));
+        })->name('admin.orders.create');
+        Route::post('/admin/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::patch('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('admin.orders.status');
         Route::get('/admin/orders/{order}/edit', [AdminController::class, 'editOrder'])->name('admin.orders.edit');
         Route::put('/admin/orders/{order}', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
+        Route::delete('/admin/orders/{order}', [OrderController::class, 'destroy'])->name('admin.orders.destroy');
 
         // Owner Only
         Route::get('/admin/services', [AdminController::class, 'services'])->name('admin.services');
@@ -47,8 +48,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/admin/services/{service}', [AdminController::class, 'updateService'])->name('admin.services.update');
         Route::delete('/admin/services/{service}', [AdminController::class, 'destroyService'])->name('admin.services.destroy');
 
+        Route::post('/admin/add-ons', [AdminController::class, 'storeAddOn'])->name('admin.add_ons.store');
+        Route::patch('/admin/add-ons/{add_on}', [AdminController::class, 'updateAddOn'])->name('admin.add_ons.update');
+        Route::delete('/admin/add-ons/{add_on}', [AdminController::class, 'destroyAddOn'])->name('admin.add_ons.destroy');
+
         Route::get('/admin/employees', [AdminController::class, 'employees'])->name('admin.employees');
         Route::post('/admin/employees', [AdminController::class, 'storeEmployee'])->name('admin.employees.store');
+        Route::patch('/admin/employees/{user}', [AdminController::class, 'updateEmployee'])->name('admin.employees.update');
         Route::delete('/admin/employees/{user}', [AdminController::class, 'destroyEmployee'])->name('admin.employees.destroy');
 
         Route::get('/admin/vouchers', [AdminController::class, 'vouchers'])->name('admin.vouchers');
@@ -61,8 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-// web.php
+// Payment
 Route::get('/payment/pay/{order}', [PaymentController::class, 'createInvoice'])->name('payment.pay');
 
 require __DIR__.'/auth.php';
