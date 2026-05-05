@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        $this->call(AddOnSeeder::class);
+
         // Akun Owner
         User::factory()->create([
             'name' => 'Owner Laundry',
