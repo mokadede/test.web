@@ -13,5 +13,6 @@
             document.documentElement.classList.add('dark');
             localStorage.theme = 'dark';
         }
+        window.dispatchEvent(new CustomEvent('theme-changed'));
     }
 </script>

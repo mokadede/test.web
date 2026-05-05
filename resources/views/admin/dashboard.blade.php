@@ -209,6 +209,24 @@
                             }
                         }
                     });
+
+                    window.addEventListener('theme-changed', () => {
+                        this.updateChartTheme();
+                    });
+                },
+                updateChartTheme() {
+                    if (!chartInstance) return;
+                    
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const color = isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+                    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                    
+                    chartInstance.options.scales.y.grid.color = gridColor;
+                    chartInstance.options.scales.y.ticks.color = color;
+                    chartInstance.options.scales.x.ticks.color = color;
+                    chartInstance.options.plugins.legend.labels.color = color;
+                    
+                    chartInstance.update();
                 },
                 checkFilters() {
                     this.hasFilters = this.$refs.startDate?.value || this.$refs.endDate?.value;
