@@ -83,7 +83,7 @@ class OrderController extends Controller
                 'notes' => $request->notes,
                 'voucher_code' => $voucherCode,
                 'discount_amount' => $discountAmount,
-                'created_by' => auth()->user() ? auth()->user()->name : ($request->created_by ?? 'Kasir POS'),
+                'created_by' => auth()->user()->name,
             ]);
 
             $createdOrders[] = $order;
@@ -96,6 +96,7 @@ class OrderController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
+                'order_number' => $sharedOrderNumber,
                 'message' => count($createdOrders) . ' pesanan berhasil dibuat!',
             ]);
         }
