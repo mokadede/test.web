@@ -31,6 +31,51 @@
                     @csrf
                     @method('PUT')
 
+                    {{-- Pembayaran & Status (MOVED TO TOP) --}}
+                    <div class="p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/50 shadow-sm mb-6">
+                        <h3 class="text-md font-bold text-indigo-700 dark:text-indigo-400 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            Update Progres & Pembayaran
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <x-input-label for="status" :value="__('Status Pesanan')" />
+                                <select id="status" name="status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm font-bold text-indigo-600">
+                                    @foreach(\App\Models\Order::statuses() as $status)
+                                        <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }}>{{ $status }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <x-input-label for="payment_method" :value="__('Metode Pembayaran')" />
+                                <select id="payment_method" name="payment_method" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                    @foreach(\App\Models\Order::paymentMethods() as $method)
+                                        <option value="{{ $method }}" {{ $order->payment_method == $method ? 'selected' : '' }}>{{ $method }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <x-input-label for="payment_status" :value="__('Status Pembayaran')" />
+                                <select id="payment_status" name="payment_status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="unpaid" {{ $order->payment_status === 'unpaid' ? 'selected' : '' }}>Belum Lunas</option>
+                                    <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>Lunas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Voucher Section --}}
+                        <div class="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                            <x-input-label for="voucher_code" :value="__('Kode Voucher')" />
+                            <div class="flex gap-2 mt-1">
+                                <x-text-input id="voucher_code" x-model="item.voucher_code" name="voucher_code" type="text" class="block w-full" placeholder="Contoh: DISKON10" />
+                                <button type="button" @click="checkVoucher()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold transition flex-shrink-0">
+                                    Gunakan
+                                </button>
+                            </div>
+                            <input type="hidden" name="discount_amount" :value="item.discount_amount">
+                        </div>
+                    </div>
+
                     {{-- Data Pelanggan --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -146,49 +191,6 @@
                                 <span class="text-3xl font-black text-indigo-600 dark:text-yellow-400 tracking-tighter" x-text="'Rp ' + grandTotal.toLocaleString('id-ID')"></span>
                             </div>
                             <p x-show="item.discount_amount > 0" class="text-xs text-green-600 mt-2 font-bold" x-text="'Potongan Voucher: -Rp ' + item.discount_amount.toLocaleString('id-ID')"></p>
-                        </div>
-                    </div>
-
-                    {{-- Pembayaran & Status --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Informasi Pembayaran & Status</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <x-input-label for="status" :value="__('Status Pesanan')" />
-                                <select id="status" name="status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    @foreach(\App\Models\Order::statuses() as $status)
-                                        <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }}>{{ $status }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <x-input-label for="payment_method" :value="__('Metode Pembayaran')" />
-                                <select id="payment_method" name="payment_method" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                    @foreach(\App\Models\Order::paymentMethods() as $method)
-                                        <option value="{{ $method }}" {{ $order->payment_method == $method ? 'selected' : '' }}>{{ $method }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <x-input-label for="payment_status" :value="__('Status Pembayaran')" />
-                                <select id="payment_status" name="payment_status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    <option value="unpaid" {{ $order->payment_status === 'unpaid' ? 'selected' : '' }}>Belum Lunas</option>
-                                    <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>Lunas</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {{-- Voucher Section --}}
-                        <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                            <x-input-label for="voucher_code" :value="__('Punya Kode Voucher?')" />
-                            <div class="flex gap-2 mt-1">
-                                <x-text-input id="voucher_code" x-model="item.voucher_code" name="voucher_code" type="text" class="block w-full" placeholder="Contoh: DISKON10" />
-                                <button type="button" @click="checkVoucher()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold transition flex-shrink-0">
-                                    Gunakan
-                                </button>
-                            </div>
-                            <p x-show="voucherMessage" x-text="voucherMessage" :class="voucherValid ? 'text-green-600' : 'text-red-600'" class="text-[10px] mt-1 font-semibold"></p>
-                            <input type="hidden" name="discount_amount" :value="item.discount_amount">
                         </div>
                     </div>
 
