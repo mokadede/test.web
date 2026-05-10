@@ -130,7 +130,7 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="total_price" :value="item.total_price + item.additional_fees">
+                        <input type="hidden" name="total_price" :value="(item.total_price + item.additional_fees) - item.discount_amount">
                         <input type="hidden" name="additional_fees" :value="item.additional_fees">
                     </div>
 

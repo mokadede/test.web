@@ -109,12 +109,12 @@ class OrderController extends Controller
                 'service_category' => $service ? $service->category : ($item['service_category'] ?? null),
                 'service_name' => $item['service_name'],
                 'additional_fees' => $additionalFees,
-                'total_price' => $totalPrice,
+                'total_price' => ($totalPrice + $additionalFees) - $discountAmount, // Fix: subtract discount
                 'estimated_days' => $item['estimated_days'] ?? ($service ? $service->estimated_days : null),
                 'add_ons' => isset($item['add_ons']) ? json_encode($item['add_ons']) : null,
                 'payment_method' => $request->payment_method,
                 'payment_status' => $request->payment_status ?? 'unpaid',
-                'status' => 'Waiting', // Default status
+                'status' => 'Waiting',
                 'notes' => $request->notes,
                 'voucher_code' => $voucherCode,
                 'discount_amount' => $discountAmount,
