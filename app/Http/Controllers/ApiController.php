@@ -50,7 +50,7 @@ class ApiController extends Controller
             $services = Service::all();
             Log::info('Fetching all services. Count: ' . count($services));
             return response()->json($services);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error fetching services: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -69,7 +69,7 @@ class ApiController extends Controller
 
             $service = Service::create($request->all());
             return response()->json($service);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Error storing service: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -90,7 +90,7 @@ class ApiController extends Controller
             $deleted = Service::where('id', $id)->delete();
             Log::info('Deleted service count: ' . $deleted);
             return response()->json(['success' => true, 'deleted' => $deleted]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error deleting service: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Server Error: ' . $e->getMessage(),
@@ -106,7 +106,7 @@ class ApiController extends Controller
             $addons = AddOn::all();
             Log::info('Fetching all add-ons. Count: ' . count($addons));
             return response()->json($addons);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error fetching add-ons: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -126,7 +126,7 @@ class ApiController extends Controller
             $deleted = AddOn::where('id', $id)->delete();
             Log::info('Deleted count: ' . $deleted);
             return response()->json(['success' => true, 'deleted' => $deleted]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('CRITICAL ERROR deleting add-on: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Server Error: ' . $e->getMessage(),
