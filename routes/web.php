@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/vouchers', [AdminController::class, 'storeVoucher'])->name('admin.vouchers.store');
         Route::patch('/admin/vouchers/{voucher}', [AdminController::class, 'updateVoucher'])->name('admin.vouchers.update');
         Route::delete('/admin/vouchers/{voucher}', [AdminController::class, 'destroyVoucher'])->name('admin.vouchers.destroy');
+        Route::post('/admin/vouchers/check', [\App\Http\Controllers\VoucherController::class, 'check'])->name('admin.vouchers.check');
     });
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

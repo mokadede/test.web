@@ -31,25 +31,6 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- Status & Pembayaran Row --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-100 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-inner">
-                        <div>
-                            <x-input-label for="status" :value="__('Status Pesanan')" />
-                            <select id="status" name="status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                @foreach(\App\Models\Order::statuses() as $status)
-                                    <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }}>{{ $status }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <x-input-label for="payment_status" :value="__('Status Pembayaran')" />
-                            <select id="payment_status" name="payment_status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="unpaid" {{ $order->payment_status === 'unpaid' ? 'selected' : '' }}>Belum Lunas</option>
-                                <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>Lunas</option>
-                            </select>
-                        </div>
-                    </div>
-
                     {{-- Data Pelanggan --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -162,15 +143,24 @@
                             </h3>
                             <div class="flex justify-between items-center pt-3 border-t border-indigo-200 dark:border-gray-700">
                                 <span class="text-xl font-bold text-gray-900 dark:text-white">Grand Total:</span>
-                                <span class="text-3xl font-black text-indigo-600 dark:text-yellow-400 tracking-tighter" x-text="'Rp ' + (item.total_price + item.additional_fees).toLocaleString('id-ID')"></span>
+                                <span class="text-3xl font-black text-indigo-600 dark:text-yellow-400 tracking-tighter" x-text="'Rp ' + grandTotal.toLocaleString('id-ID')"></span>
                             </div>
+                            <p x-show="item.discount_amount > 0" class="text-xs text-green-600 mt-2 font-bold" x-text="'Potongan Voucher: -Rp ' + item.discount_amount.toLocaleString('id-ID')"></p>
                         </div>
                     </div>
 
-                    {{-- Pembayaran --}}
+                    {{-- Pembayaran & Status --}}
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Metode Pembayaran</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Informasi Pembayaran & Status</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <x-input-label for="status" :value="__('Status Pesanan')" />
+                                <select id="status" name="status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    @foreach(\App\Models\Order::statuses() as $status)
+                                        <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }}>{{ $status }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div>
                                 <x-input-label for="payment_method" :value="__('Metode Pembayaran')" />
                                 <select id="payment_method" name="payment_method" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
@@ -179,6 +169,26 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div>
+                                <x-input-label for="payment_status" :value="__('Status Pembayaran')" />
+                                <select id="payment_status" name="payment_status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="unpaid" {{ $order->payment_status === 'unpaid' ? 'selected' : '' }}>Belum Lunas</option>
+                                    <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>Lunas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Voucher Section --}}
+                        <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                            <x-input-label for="voucher_code" :value="__('Punya Kode Voucher?')" />
+                            <div class="flex gap-2 mt-1">
+                                <x-text-input id="voucher_code" x-model="item.voucher_code" name="voucher_code" type="text" class="block w-full" placeholder="Contoh: DISKON10" />
+                                <button type="button" @click="checkVoucher()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold transition flex-shrink-0">
+                                    Gunakan
+                                </button>
+                            </div>
+                            <p x-show="voucherMessage" x-text="voucherMessage" :class="voucherValid ? 'text-green-600' : 'text-red-600'" class="text-[10px] mt-1 font-semibold"></p>
+                            <input type="hidden" name="discount_amount" :value="item.discount_amount">
                         </div>
                     </div>
 
@@ -202,12 +212,19 @@
             Alpine.data('orderForm', () => ({
                 services: @json($services),
                 additionalFeeOptions: @json($add_ons),
+                voucherMessage: '',
+                voucherValid: false,
                 item: {
                     service_name: '{{ $order->service_name }}',
-                    total_price: {{ $order->total_price - ($order->additional_fees ?? 0) }},
+                    total_price: {{ $order->total_price - ($order->additional_fees ?? 0) + ($order->discount_amount ?? 0) }},
                     additional_fees: {{ $order->additional_fees ?? 0 }},
                     estimated_days: '{{ $order->estimated_days ?? "-" }}',
-                    selected_add_ons: @json($order->add_ons ? array_column($order->add_ons, 'name') : [])
+                    selected_add_ons: @json($order->add_ons ? array_column($order->add_ons, 'name') : []),
+                    voucher_code: '{{ $order->voucher_code }}',
+                    discount_amount: {{ $order->discount_amount ?? 0 }}
+                },
+                get grandTotal() {
+                    return (this.item.total_price + this.item.additional_fees) - this.item.discount_amount;
                 },
                 updatePrice() {
                     const service = this.services.find(s => s.name === this.item.service_name);
@@ -226,6 +243,43 @@
                             this.item.selected_add_ons.splice(index, 1);
                             this.item.additional_fees -= parseInt(feePrice);
                         }
+                    }
+                },
+                async checkVoucher() {
+                    if (!this.item.voucher_code) return;
+                    
+                    try {
+                        const response = await fetch('{{ route('admin.vouchers.check') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                code: this.item.voucher_code,
+                                subtotal: this.item.total_price + this.item.additional_fees
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok) {
+                            const voucher = result.data;
+                            let discount = 0;
+                            if (voucher.discount_type === 'percent') {
+                                discount = (this.item.total_price + this.item.additional_fees) * (voucher.discount_amount / 100);
+                            } else {
+                                discount = voucher.discount_amount;
+                            }
+                            this.item.discount_amount = discount;
+                            alert(`Sukses! Voucher berhasil digunakan.\nPotongan: Rp ${discount.toLocaleString('id-ID')}`);
+                        } else {
+                            this.item.discount_amount = 0;
+                            alert('Gagal: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('Voucher check failed:', error);
+                        alert('Terjadi kesalahan sistem saat mengecek voucher.');
                     }
                 }
             }))

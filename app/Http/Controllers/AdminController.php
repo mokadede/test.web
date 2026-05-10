@@ -104,6 +104,8 @@ class AdminController extends Controller
             'status' => 'required|string',
             'notes' => 'nullable|string',
             'add_ons' => 'nullable|array',
+            'voucher_code' => 'nullable|string',
+            'discount_amount' => 'nullable|numeric',
         ]);
 
         // Auto-set category and estimated_days from service
@@ -135,6 +137,8 @@ class AdminController extends Controller
             'status' => $request->status,
             'notes' => $request->notes,
             'add_ons' => $addOns,
+            'voucher_code' => $request->voucher_code,
+            'discount_amount' => $request->discount_amount ?? 0,
         ]);
 
         return redirect()->route('admin.orders')->with('success', 'Data pesanan berhasil diperbarui.');
@@ -343,6 +347,10 @@ class AdminController extends Controller
             'code' => 'required|unique:vouchers',
             'discount_amount' => 'required|numeric',
             'discount_type' => 'required|in:fixed,percent',
+            'min_order' => 'nullable|numeric',
+            'max_uses' => 'nullable|integer',
+            'valid_from' => 'nullable|date',
+            'valid_until' => 'nullable|date',
         ]);
         \App\Models\Voucher::create($request->all());
         return back()->with('success', 'Voucher berhasil dibuat.');
@@ -362,6 +370,10 @@ class AdminController extends Controller
             'code' => 'required|unique:vouchers,code,' . $voucher->id,
             'discount_amount' => 'required|numeric',
             'discount_type' => 'required|in:fixed,percent',
+            'min_order' => 'nullable|numeric',
+            'max_uses' => 'nullable|integer',
+            'valid_from' => 'nullable|date',
+            'valid_until' => 'nullable|date',
         ]);
         $voucher->update($request->all());
         return back()->with('success', 'Voucher berhasil diperbarui.');
