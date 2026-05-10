@@ -102,12 +102,13 @@ class VoucherController extends Controller
             return response()->json(['message' => 'Voucher tidak aktif'], 400);
         }
 
-        $now = date('Y-m-d');
-        if ($voucher->valid_from && $now < $voucher->valid_from) {
+        $today = \Carbon\Carbon::today();
+        
+        if ($voucher->valid_from && $today->lt($voucher->valid_from)) {
             return response()->json(['message' => 'Voucher belum bisa digunakan'], 400);
         }
 
-        if ($voucher->valid_until && $now > $voucher->valid_until) {
+        if ($voucher->valid_until && $today->gt($voucher->valid_until)) {
             return response()->json(['message' => 'Voucher sudah kadaluarsa'], 400);
         }
 
