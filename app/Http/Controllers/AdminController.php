@@ -43,7 +43,7 @@ class AdminController extends Controller
             $query->latest();
         }
 
-        $orders = $query->get();
+        $orders = $query->paginate(20)->withQueryString();
 
         if ($request->ajax()) {
             return view('admin.partials.orders-table', compact('orders'));
@@ -79,6 +79,13 @@ class AdminController extends Controller
         $request->validate(['status' => 'required|string']);
         $order->update(['status' => $request->status]);
         return back()->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+    public function togglePaymentStatus(Order $order)
+    {
+        $newStatus = $order->payment_status === 'paid' ? 'unpaid' : 'paid';
+        $order->update(['payment_status' => $newStatus]);
+        return back()->with('success', 'Status pembayaran pesanan #' . $order->order_number . ' berhasil diubah menjadi ' . ($newStatus === 'paid' ? 'Lunas' : 'Belum Lunas'));
     }
 
     public function editOrder(Order $order)

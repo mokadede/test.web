@@ -47,49 +47,47 @@
     }">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mx-4 sm:mx-0">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
                 {{ session('success') }}
             </div>
         @endif
 
-    <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg relative" x-data="{ open: false, order: {} }">
+    <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg relative" x-data="{ open: false, order: {} }">
         <!-- Inline Filters & Search -->
-        <div class="p-4 sm:p-6 border-b dark:border-gray-700">
+        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <form id="filterForm" method="GET" action="{{ route('admin.orders') }}" 
-                class="flex flex-col lg:flex-row lg:items-center justify-between gap-4" 
+                class="flex flex-wrap items-center gap-3 flex-1" 
                 x-ref="form"
                 @submit.prevent="submitFilter()">
                 
-                <div class="relative flex-1">
+                <div class="relative flex-1 min-w-[200px]">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" 
                         placeholder="Cari kode, nama, atau petugas..."
                         @input.debounce.500ms="submitFilter()"
-                        class="block w-full pl-10 text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2.5">
+                        class="block w-full pl-10 text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 
-                <div class="flex flex-col sm:flex-row items-center gap-3">
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <input type="date" name="start_date" value="{{ request('start_date') }}" 
-                            @change="submitFilter()"
-                            class="flex-1 sm:w-32 text-[11px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2">
-                        <span class="text-gray-400 text-[10px] font-bold uppercase">s/d</span>
-                        <input type="date" name="end_date" value="{{ request('end_date') }}" 
-                            @change="submitFilter()"
-                            class="flex-1 sm:w-32 text-[11px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2">
-                    </div>
-
-                    <a href="{{ route('admin.orders') }}" 
-                       x-show="hasFilters"
-                       @click.prevent="resetFilter()"
-                       class="w-full sm:w-auto px-4 py-2 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 text-[10px] font-bold uppercase rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition flex justify-center items-center gap-1"
-                       x-cloak>
-                        <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        Reset Filter
-                    </a>
+                <div class="flex items-center gap-2">
+                    <input type="date" name="start_date" value="{{ request('start_date') }}" 
+                        @change="submitFilter()"
+                        class="text-[11px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-1.5">
+                    <span class="text-gray-400 text-[10px] font-bold uppercase">s/d</span>
+                    <input type="date" name="end_date" value="{{ request('end_date') }}" 
+                        @change="submitFilter()"
+                        class="text-[11px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-1.5">
                 </div>
+
+                <a href="{{ route('admin.orders') }}" 
+                   x-show="hasFilters"
+                   @click.prevent="resetFilter()"
+                   class="px-3 py-1.5 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 text-[10px] font-bold uppercase rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition flex items-center gap-1"
+                   x-cloak>
+                    <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Reset
+                </a>
             </form>
         </div>
 
@@ -98,7 +96,7 @@
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
         </div>
 
-        <div id="tableContainer">
+        <div class="overflow-x-auto" id="tableContainer">
             @include('admin.partials.orders-table')
         </div>
         <!-- Modal Detail Pesanan -->

@@ -38,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('admin.orders.create');
         Route::post('/admin/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::patch('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('admin.orders.status');
+        Route::patch('/orders/{order}/payment-status', [AdminController::class, 'togglePaymentStatus'])->name('admin.orders.payment_status');
         Route::get('/admin/orders/{order}/edit', [AdminController::class, 'editOrder'])->name('admin.orders.edit');
         Route::put('/admin/orders/{order}', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
         Route::delete('/admin/orders/{order}', [OrderController::class, 'destroy'])->name('admin.orders.destroy');
