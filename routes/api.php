@@ -11,6 +11,7 @@ Route::post('/login', [ApiController::class, 'login']);
 // Public routes for catalog (Mobile App Sync)
 Route::get('/services', [ApiController::class, 'services']);
 Route::get('/add_ons', [ApiController::class, 'addOns']);
+Route::post('/add_ons', [ApiController::class, 'storeAddOn']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {

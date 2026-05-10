@@ -53,6 +53,21 @@ class ApiController extends Controller
         return response()->json(AddOn::all());
     }
 
+    public function storeAddOn(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'price' => 'required|numeric'
+        ]);
+
+        $addon = AddOn::create([
+            'name' => $request->name,
+            'price' => $request->price
+        ]);
+
+        return response()->json(['message' => 'Add-on created successfully', 'data' => $addon], 201);
+    }
+
     public function vouchers()
     {
         return response()->json(Voucher::where('is_active', true)->get());
