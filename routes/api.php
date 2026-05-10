@@ -20,5 +20,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/vouchers', [ApiController::class, 'vouchers']);
     Route::get('/dashboard', [ApiController::class, 'dashboard']);
     
+    Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
 });

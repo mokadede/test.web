@@ -8,6 +8,25 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = Order::orderBy('created_at', 'desc');
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('order_number', 'like', "%{$request->search}%")
+                  ->orWhere('customer_name', 'like', "%{$request->search}%")
+                  ->orWhere('phone_number', 'like', "%{$request->search}%");
+            });
+        }
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        return response()->json($query->get());
+    }
+
     public function store(Request $request)
     {
         $request->validate([
