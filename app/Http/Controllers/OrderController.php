@@ -61,38 +61,26 @@ class OrderController extends Controller
         $createdOrders = [];
         $totalGrandPrice = 0;
         
-        // Loop through each item and create an order
+        // Loop melalui setiap item dan buat pesanan
         foreach ($request->items as $item) {
-            $service = Service::where('name', $item['service_name'])->first();
-
-            $totalPrice = (int) $item['total_price'];
+            $totalPrice = (int) ($item['total_price'] ?? 0);
             $additionalFees = (int) ($item['additional_fees'] ?? 0);
-            $totalPrice += $additionalFees;
-
-            // Apply voucher logic per item or globally?
-            // Usually, a voucher applies to the whole cart, but since orders are individual records, 
-            // we will apply it proportionally or just let the first item absorb it?
-            // To keep it simple, we will apply the discount amount calculated from the total of all items to the first item, 
-            // or split it. Actually, it's easier to just calculate it per item if it's a percentage.
-            // If it's a fixed amount, it's tricky. Let's just calculate it per item for now.
+            $voucherCode = $request->voucher_code;
+            
+            // Jika diskon dikirim dari frontend, gunakan itu. 
+            // Jika tidak (misal dari web admin lama), baru kalkulasi manual.
             $discountAmount = 0;
-            $voucherCode = null;
-
-            if ($request->voucher_code) {
+            if ($request->has('discount_amount')) {
+                // Bagi diskon ke setiap item jika dikirim totalnya
+                $discountAmount = (float) $request->discount_amount / count($request->items);
+            } else if ($request->voucher_code) {
                 $voucher = \App\Models\Voucher::where('code', $request->voucher_code)->where('is_active', true)->first();
                 if ($voucher) {
-                    $voucherCode = $voucher->code;
                     if ($voucher->discount_type == 'percent') {
                         $discountAmount = $totalPrice * ($voucher->discount_amount / 100);
                     } else {
-                        // Fixed amount spread across items
                         $discountAmount = $voucher->discount_amount / count($request->items);
                     }
-                    
-                    if ($discountAmount > $totalPrice) {
-                        $discountAmount = $totalPrice;
-                    }
-                    $totalPrice -= $discountAmount;
                 }
             }
 
@@ -158,7 +146,8 @@ class OrderController extends Controller
         $order->update($request->only([
             'status', 'payment_status', 'notes', 'customer_name', 'phone_number',
             'shoe_brand', 'shoe_size', 'shoe_condition', 'service_name',
-            'additional_fees', 'add_ons', 'total_price', 'estimated_days', 'payment_method'
+            'additional_fees', 'add_ons', 'total_price', 'estimated_days', 'payment_method',
+            'voucher_code', 'discount_amount'
         ]));
         
         // If add_ons is passed as array, encode it to JSON
