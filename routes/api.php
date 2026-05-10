@@ -8,6 +8,10 @@ use App\Http\Controllers\OrderController;
 
 Route::post('/login', [ApiController::class, 'login']);
 
+// Public routes for catalog (Mobile App Sync)
+Route::get('/services', [ApiController::class, 'services']);
+Route::get('/add_ons', [ApiController::class, 'addOns']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -15,8 +19,6 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/logout', [ApiController::class, 'logout']);
     
-    Route::get('/services', [ApiController::class, 'services']);
-    Route::get('/add_ons', [ApiController::class, 'addOns']);
     Route::get('/vouchers', [ApiController::class, 'vouchers']);
     Route::get('/dashboard', [ApiController::class, 'dashboard']);
     
