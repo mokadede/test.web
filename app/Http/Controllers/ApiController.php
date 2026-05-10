@@ -46,7 +46,14 @@ class ApiController extends Controller
 
     public function services()
     {
-        return response()->json(Service::all());
+        try {
+            $services = Service::all();
+            Log::info('Fetching all services. Count: ' . count($services));
+            return response()->json($services);
+        } catch (\Exception $e) {
+            Log::error('Error fetching services: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function storeService(Request $request)
@@ -95,7 +102,14 @@ class ApiController extends Controller
 
     public function addOns()
     {
-        return response()->json(AddOn::all());
+        try {
+            $addons = AddOn::all();
+            Log::info('Fetching all add-ons. Count: ' . count($addons));
+            return response()->json($addons);
+        } catch (\Exception $e) {
+            Log::error('Error fetching add-ons: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function storeAddOn(Request $request)
