@@ -63,6 +63,8 @@ class OrderController extends Controller
         
         // Loop melalui setiap item dan buat pesanan
         foreach ($request->items as $item) {
+            $service = Service::where('name', $item['service_name'])->first();
+            
             $totalPrice = (int) ($item['total_price'] ?? 0);
             $additionalFees = (int) ($item['additional_fees'] ?? 0);
             $voucherCode = $request->voucher_code;
@@ -98,7 +100,7 @@ class OrderController extends Controller
                 'estimated_days' => $item['estimated_days'] ?? ($service ? $service->estimated_days : null),
                 'add_ons' => isset($item['add_ons']) ? json_encode($item['add_ons']) : null,
                 'payment_method' => $request->payment_method,
-                'payment_status' => 'unpaid',
+                'payment_status' => $request->payment_status ?? 'unpaid',
                 'status' => 'Waiting', // Default status
                 'notes' => $request->notes,
                 'voucher_code' => $voucherCode,
