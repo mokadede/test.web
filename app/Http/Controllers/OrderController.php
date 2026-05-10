@@ -24,6 +24,14 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->start_date) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->end_date) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
         return response()->json($query->get());
     }
 
