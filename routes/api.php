@@ -24,7 +24,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/add_ons', [ApiController::class, 'storeAddOn']);
     Route::delete('/add_ons/{id}', [ApiController::class, 'deleteAddOn']);
 
-    Route::get('/vouchers', [ApiController::class, 'vouchers']);
+    Route::get('/vouchers', [\App\Http\Controllers\VoucherController::class, 'index']);
+    Route::post('/vouchers', [\App\Http\Controllers\VoucherController::class, 'store']);
+    Route::put('/vouchers/{id}', [\App\Http\Controllers\VoucherController::class, 'update']);
+    Route::delete('/vouchers/{id}', [\App\Http\Controllers\VoucherController::class, 'destroy']);
+    Route::post('/vouchers/{id}/toggle', [\App\Http\Controllers\VoucherController::class, 'toggleActive']);
+    Route::post('/vouchers/check', [\App\Http\Controllers\VoucherController::class, 'check']);
+
     Route::get('/dashboard', [ApiController::class, 'dashboard']);
     
     Route::get('/orders', [OrderController::class, 'index']);

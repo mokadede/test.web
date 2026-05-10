@@ -122,6 +122,14 @@ class OrderController extends Controller
             $totalGrandPrice += $totalPrice;
         }
 
+        // Increment used_count jika menggunakan voucher
+        if ($request->voucher_code) {
+            $voucher = \App\Models\Voucher::where('code', $request->voucher_code)->first();
+            if ($voucher) {
+                $voucher->increment('used_count');
+            }
+        }
+
         // For payment integration, usually it expects a single order. If multiple, we might need a grouping logic.
         // For now, if not cash, redirect to payment for the FIRST order (this might be a limitation of flat schema).
         // To be safe, we redirect to orders list if there are multiple. If single, go to payment.
