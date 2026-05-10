@@ -92,56 +92,71 @@
                 @endif
             </td>
             <td class="px-4 py-4 text-sm text-gray-500">
-                <div>
-                    @if($order->shoe_brand)
-                        <b>{{ $order->shoe_brand }}</b>
+                <div class="flex flex-col gap-0.5">
+                    <div class="text-gray-900 dark:text-gray-100">
+                        @if($order->shoe_brand)
+                            <span class="font-bold">{{ $order->shoe_brand }}</span>
+                        @endif
+                        @if($order->shoe_size)
+                            <span class="text-xs text-gray-500">(Size: {{ $order->shoe_size }})</span>
+                        @endif
+                    </div>
+                    @if($order->shoe_condition)
+                        <div class="text-[11px] text-gray-400 dark:text-gray-500 italic">Kondisi: {{ $order->shoe_condition }}</div>
                     @endif
-                    @if($order->shoe_size)
-                        <span class="text-xs">(Size: {{ $order->shoe_size }})</span>
+                    @if($order->deadline_date)
+                        <div class="text-[10px] text-indigo-500 mt-0.5 font-semibold flex items-center gap-1">
+                            <span>📅</span> Selesai: {{ $order->deadline_date->format('d M Y') }}
+                        </div>
                     @endif
                 </div>
-                @if($order->shoe_condition)
-                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Kondisi: {{ $order->shoe_condition }}</div>
-                @endif
-                @if($order->deadline_date)
-                    <div class="text-[10px] text-indigo-500 mt-1 font-medium">
-                        📅 Selesai: {{ $order->deadline_date->format('d M Y') }}
-                    </div>
-                @endif
             </td>
-            <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                <div class="font-semibold">{{ $order->service_name }}</div>
-                @if($order->service_category)
-                    <div class="text-xs text-gray-400 dark:text-gray-500">{{ $order->service_category }}</div>
-                @endif
-                @if($order->additional_fees > 0)
-                    <div class="text-xs text-orange-500 mt-0.5">+ Rp {{ number_format($order->additional_fees, 0, ',', '.') }} tambahan</div>
-                @endif
+            <td class="px-4 py-4 text-sm">
+                <div class="flex flex-col gap-0.5">
+                    <div class="font-bold text-gray-900 dark:text-gray-100 leading-tight">{{ $order->service_name }}</div>
+                    @if($order->service_category)
+                        <div class="text-[11px] text-gray-500 dark:text-gray-400">{{ $order->service_category }}</div>
+                    @endif
+                    @if($order->additional_fees > 0)
+                        <div class="text-[10px] text-orange-600 font-bold mt-0.5 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded-sm w-fit">
+                            + Rp {{ number_format($order->additional_fees, 0, ',', '.') }} tambahan
+                        </div>
+                    @endif
+                </div>
             </td>
             <td class="px-4 py-4 text-sm text-center">
-                <div class="flex flex-col items-center gap-1">
-                    <span class="text-xs font-semibold text-gray-400">{{ $order->payment_method ?? '-' }}</span>
-                    <form action="{{ route('admin.orders.payment_status', $order) }}" method="POST">
+                <div class="flex flex-col items-center gap-1.5">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $order->payment_method ?? '-' }}</span>
+                    <form action="{{ route('admin.orders.payment_status', $order) }}" method="POST" class="m-0 p-0">
                         @csrf @method('PATCH')
-                        <button type="submit" title="Klik untuk ubah status" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase w-fit transition hover:scale-105 active:scale-95 {{ $order->payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                        <button type="submit" title="Klik untuk ubah status" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase w-fit transition hover:scale-105 active:scale-95 shadow-sm {{ $order->payment_status === 'paid' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200' }}">
                             {{ $order->payment_status === 'paid' ? 'Lunas' : 'Belum Lunas' }}
                         </button>
                     </form>
                 </div>
             </td>
-            <td class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+            <td class="px-4 py-4 text-sm font-black text-gray-900 dark:text-gray-100">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-gray-400 font-normal">Total</span>
+                    Rp {{ number_format($order->total_price, 0, ',', '.') }}
+                </div>
+            </td>
             <td class="px-4 py-4 text-sm text-center">
-                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase border" 
-                       :class="{
-                           'bg-gray-100 text-gray-800 border-gray-200': '{{ $order->status }}' === 'Waiting',
-                           'bg-blue-100 text-blue-800 border-blue-200': '{{ $order->status }}' === 'Cleaning',
-                           'bg-yellow-100 text-yellow-800 border-yellow-200': '{{ $order->status }}' === 'Drying',
-                           'bg-indigo-100 text-indigo-800 border-indigo-200': '{{ $order->status }}' === 'Ready',
-                           'bg-green-100 text-green-800 border-green-200': '{{ $order->status }}' === 'Delivered',
-                           'bg-red-100 text-red-800 border-red-200': '{{ $order->status }}' === 'cancelled'
-                       }">
-                    {{ $order->status }}
-                </span>
+                <form action="{{ route('admin.orders.next_status', $order) }}" method="POST" class="m-0 p-0">
+                    @csrf @method('PATCH')
+                    <button type="submit" title="Klik untuk memajukan status" 
+                           class="px-2 py-1 rounded text-[10px] font-bold uppercase border transition hover:scale-110 active:scale-95 shadow-sm min-w-[80px]" 
+                           :class="{
+                               'bg-gray-100 text-gray-800 border-gray-200': '{{ $order->status }}' === 'Waiting',
+                               'bg-blue-100 text-blue-800 border-blue-200': '{{ $order->status }}' === 'Cleaning',
+                               'bg-yellow-100 text-yellow-800 border-yellow-200': '{{ $order->status }}' === 'Drying',
+                               'bg-indigo-100 text-indigo-800 border-indigo-200': '{{ $order->status }}' === 'Ready',
+                               'bg-green-100 text-green-800 border-green-200': '{{ $order->status }}' === 'Delivered',
+                               'bg-red-100 text-red-800 border-red-200': '{{ $order->status }}' === 'cancelled'
+                           }">
+                        {{ $order->status }}
+                    </button>
+                </form>
             </td>
             <td class="px-4 py-4 text-sm">
                 @if($order->phone_number)
@@ -154,7 +169,7 @@
             </td>
             <td class="px-4 py-4 text-sm text-center">
                 <div class="flex items-center justify-center gap-2">
-                    <a href="{{ route('admin.orders.edit', $order) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-600 border border-transparent rounded-md font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 transition ease-in-out duration-150 gap-1 shadow-sm">
+                    <a href="{{ route('admin.orders.edit', $order) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-indigo-600 border border-transparent rounded-md font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-800 transition ease-in-out duration-150 gap-1 shadow-sm">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Edit
                     </a>

@@ -88,6 +88,17 @@ class AdminController extends Controller
         return back()->with('success', 'Status pembayaran pesanan #' . $order->order_number . ' berhasil diubah menjadi ' . ($newStatus === 'paid' ? 'Lunas' : 'Belum Lunas'));
     }
 
+    public function nextStatus(Order $order)
+    {
+        $statuses = ['Waiting', 'Cleaning', 'Drying', 'Ready', 'Delivered'];
+        $currentIndex = array_search($order->status, $statuses);
+        
+        $nextIndex = ($currentIndex === false || $currentIndex >= count($statuses) - 1) ? 0 : $currentIndex + 1;
+        $order->update(['status' => $statuses[$nextIndex]]);
+        
+        return back()->with('success', 'Status pesanan #' . $order->order_number . ' sekarang: ' . $statuses[$nextIndex]);
+    }
+
     public function editOrder(Order $order)
     {
         $services = Service::all();
