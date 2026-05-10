@@ -136,9 +136,38 @@ class OrderController extends Controller
         return redirect()->route('admin.orders')->with('success', count($createdOrders) . ' pesanan berhasil dibuat untuk ' . $request->customer_name);
     }
 
-    public function destroy(Order $order)
+    public function update(Request $request, $id)
     {
+        $order = Order::find($id);
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
+        }
+        
+        $order->update($request->only(['status', 'payment_status', 'notes', 'customer_name', 'phone_number']));
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Pesanan berhasil diperbarui',
+            'order' => $order
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $order = Order::find($id);
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
+        }
+        
         $order->delete();
+
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pesanan berhasil dihapus',
+            ]);
+        }
+
         return back()->with('success', 'Pesanan berhasil dihapus.');
     }
 }

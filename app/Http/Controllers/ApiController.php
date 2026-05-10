@@ -48,11 +48,53 @@ class ApiController extends Controller
         return response()->json(Service::all());
     }
 
+    public function storeService(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'price' => 'required|numeric',
+            'category' => 'nullable|string',
+            'estimated_days' => 'nullable|string',
+        ]);
+
+        $service = Service::create($request->all());
+        return response()->json($service);
+    }
+
+    public function updateService(Request $request, $id)
+    {
+        $service = Service::find($id);
+        if (!$service) return response()->json(['message' => 'Not found'], 404);
+        $service->update($request->all());
+        return response()->json($service);
+    }
+
+    public function deleteService($id)
+    {
+        $service = Service::find($id);
+        if ($service) $service->delete();
+        return response()->json(['success' => true]);
+    }
+
     public function addOns()
     {
         return response()->json(AddOn::all());
     }
 
+    public function storeAddOn(Request $request)
+    {
+        $request->validate(['name' => 'required', 'price' => 'required']);
+        $addon = AddOn::create($request->all());
+        return response()->json($addon);
+    }
+
+    public function deleteAddOn($id)
+    {
+        $addon = AddOn::find($id);
+        if ($addon) $addon->delete();
+        return response()->json(['success' => true]);
+    }
+    
     public function vouchers()
     {
         return response()->json(Voucher::where('is_active', true)->get());
