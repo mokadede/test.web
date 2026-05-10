@@ -109,6 +109,16 @@ class AdminController extends Controller
         // Auto-set category and estimated_days from service
         $service = Service::where('name', $request->service_name)->first();
 
+        $addOns = [];
+        if ($request->has('add_ons')) {
+            foreach ($request->add_ons as $addon) {
+                $decoded = json_decode($addon, true);
+                if ($decoded) {
+                    $addOns[] = $decoded;
+                }
+            }
+        }
+
         $order->update([
             'customer_name' => $request->customer_name,
             'phone_number' => $request->phone_number,
@@ -124,7 +134,7 @@ class AdminController extends Controller
             'payment_status' => $request->payment_status,
             'status' => $request->status,
             'notes' => $request->notes,
-            'add_ons' => $request->add_ons,
+            'add_ons' => $addOns,
         ]);
 
         return redirect()->route('admin.orders')->with('success', 'Data pesanan berhasil diperbarui.');

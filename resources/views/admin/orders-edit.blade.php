@@ -1,11 +1,11 @@
 <x-app-layout title="Edit Pesanan">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Edit Pesanan') }} #{{ $order->tracking_code }}
+            {{ __('Edit Pesanan') }} #{{ $order->order_id_formatted }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="orderForm()">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @if ($errors->any())
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
@@ -18,12 +18,21 @@
             @endif
 
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <form method="post" action="{{ route('admin.orders.update', $order) }}" class="space-y-6">
+                <header>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        {{ __('Edit Data Pelanggan & Layanan') }}
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        {{ __("Perbarui detail pesanan pelanggan. Harga akan otomatis terhitung kembali jika layanan atau add-on diubah.") }}
+                    </p>
+                </header>
+
+                <form method="post" action="{{ route('admin.orders.update', $order) }}" class="mt-6 space-y-6">
                     @csrf
                     @method('PUT')
 
-                    {{-- Status --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Status & Pembayaran Row --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-800">
                         <div>
                             <x-input-label for="status" :value="__('Status Pesanan')" />
                             <select id="status" name="status" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
@@ -42,149 +51,140 @@
                     </div>
 
                     {{-- Data Pelanggan --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Data Pelanggan</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label for="customer_name" :value="__('Nama Pelanggan')" />
-                                <x-text-input id="customer_name" name="customer_name" type="text" class="mt-1 block w-full" required value="{{ old('customer_name', $order->customer_name) }}" />
-                            </div>
-                            <div>
-                                <x-input-label for="phone_number" :value="__('Nomor HP / WhatsApp')" />
-                                <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" required value="{{ old('phone_number', $order->phone_number) }}" />
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="customer_name" :value="__('Nama Pelanggan')" />
+                            <x-text-input id="customer_name" name="customer_name" type="text" class="mt-1 block w-full" required value="{{ old('customer_name', $order->customer_name) }}" />
+                        </div>
+                        <div>
+                            <x-input-label for="phone_number" :value="__('Nomor HP / WhatsApp')" />
+                            <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" required value="{{ old('phone_number', $order->phone_number) }}" />
                         </div>
                     </div>
 
-                    {{-- Detail Sepatu --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Detail Sepatu</h3>
+                    {{-- Item Box (Styled like Create) --}}
+                    <div class="border border-indigo-100 dark:border-indigo-900/50 rounded-lg p-4 mt-6 bg-indigo-50/30 dark:bg-indigo-900/10 relative">
+                        <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-md font-bold text-indigo-700 dark:text-indigo-400">Detail Item</h3>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="shoe_brand" :value="__('Merek Sepatu')" />
-                                <x-text-input id="shoe_brand" name="shoe_brand" type="text" class="mt-1 block w-full" value="{{ old('shoe_brand', $order->shoe_brand) }}" />
+                                <x-input-label :value="__('Merek Sepatu')" />
+                                <x-text-input name="shoe_brand" type="text" class="mt-1 block w-full" value="{{ old('shoe_brand', $order->shoe_brand) }}" />
                             </div>
                             <div>
-                                <x-input-label for="shoe_size" :value="__('Ukuran Sepatu')" />
-                                <x-text-input id="shoe_size" name="shoe_size" type="text" class="mt-1 block w-full" value="{{ old('shoe_size', $order->shoe_size) }}" />
+                                <x-input-label :value="__('Ukuran Sepatu')" />
+                                <x-text-input name="shoe_size" type="text" class="mt-1 block w-full" value="{{ old('shoe_size', $order->shoe_size) }}" />
                             </div>
                         </div>
+
                         <div class="mt-4">
-                            <x-input-label for="shoe_condition" :value="__('Kondisi Sepatu')" />
-                            <select id="shoe_condition" name="shoe_condition" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <x-input-label :value="__('Kondisi Sepatu')" />
+                            <select name="shoe_condition" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                 <option value="">-- Pilih Kondisi --</option>
                                 @foreach(\App\Models\Order::shoeConditions() as $condition)
-                                    <option value="{{ $condition }}" {{ old('shoe_condition', $order->shoe_condition) == $condition ? 'selected' : '' }}>{{ $condition }}</option>
+                                    <option value="{{ $condition }}" {{ $order->shoe_condition == $condition ? 'selected' : '' }}>{{ $condition }}</option>
                                 @endforeach
                             </select>
                         </div>
-                    </div>
 
-                    {{-- Layanan --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Layanan</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label for="service_category" :value="__('Kategori Layanan')" />
-                                <select id="service_category" name="service_category" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    <option value="">-- Pilih Kategori --</option>
-                                    @foreach(\App\Models\Order::serviceCategories() as $cat)
-                                        <option value="{{ $cat }}" {{ old('service_category', $order->service_category) == $cat ? 'selected' : '' }}>{{ $cat }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <x-input-label for="service_name" :value="__('Nama Layanan')" />
-                                <select id="service_name" name="service_name" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                    @foreach($services as $service)
-                                        <option value="{{ $service->name }}" data-price="{{ $service->price }}" {{ old('service_name', $order->service_name) == $service->name ? 'selected' : '' }}>
-                                            {{ $service->name }} - Rp {{ number_format($service->price, 0, ',', '.') }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                        <div class="mt-6">
+                            <x-input-label :value="__('Layanan')" />
+                            <select x-model="item.service_name" @change="updatePrice()" name="service_name" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <option value="">-- Pilih Layanan --</option>
+                                <optgroup label="Cleaning">
+                                @foreach($services->where('category', 'Cleaning') as $service)
+                                    <option value="{{ $service->name }}" data-price="{{ $service->price }}">{{ $service->name }} - Rp {{ number_format($service->price, 0, ',', '.') }}</option>
+                                @endforeach
+                                </optgroup>
+                                <optgroup label="Special Treatment">
+                                @foreach($services->where('category', 'Special Treatment') as $service)
+                                    <option value="{{ $service->name }}" data-price="{{ $service->price }}">{{ $service->name }} - Rp {{ number_format($service->price, 0, ',', '.') }}</option>
+                                @endforeach
+                                </optgroup>
+                                <optgroup label="Repaint Treatment">
+                                @foreach($services->where('category', 'Repaint Treatment') as $service)
+                                    <option value="{{ $service->name }}" data-price="{{ $service->price }}">{{ $service->name }} - Rp {{ number_format($service->price, 0, ',', '.') }}</option>
+                                @endforeach
+                                </optgroup>
+                                <optgroup label="Repair Treatment">
+                                @foreach($services->where('category', 'Repair Treatment') as $service)
+                                    <option value="{{ $service->name }}" data-price="{{ $service->price }}">{{ $service->name }} - Rp {{ number_format($service->price, 0, ',', '.') }}</option>
+                                @endforeach
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        {{-- Add-Ons (Checkbox Card Style) --}}
+                        <div class="mt-6">
+                            <x-input-label :value="__('Biaya Tambahan (opsional)')" class="mb-2" />
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                <template x-for="(fee, feeIndex) in additionalFeeOptions" :key="feeIndex">
+                                    <label class="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-indigo-300 transition-colors">
+                                        <input type="checkbox" name="add_ons[]" 
+                                            :value="JSON.stringify({name: fee.name, price: fee.price})" 
+                                            :checked="item.selected_add_ons.includes(fee.name)"
+                                            @change="toggleFee(fee.name, fee.price, $event.target.checked)" 
+                                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                        <div>
+                                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                                <span x-text="fee.name"></span>
+                                                <span class="block text-[10px] text-gray-400" x-text="'+Rp ' + parseInt(fee.price).toLocaleString('id-ID')"></span>
+                                            </span>
+                                        </div>
+                                    </label>
+                                </template>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Add-Ons Checkboxes --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Pilih Biaya Tambahan (Add-Ons)</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            @foreach($add_ons as $addon)
-                                @php
-                                    $isSelected = false;
-                                    if ($order->add_ons) {
-                                        foreach ($order->add_ons as $item) {
-                                            if (is_array($item) && $item['name'] === $addon->name) {
-                                                $isSelected = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                @endphp
-                                <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors shadow-sm">
-                                    <input type="checkbox" name="add_ons[]" 
-                                        value="{{ json_encode(['name' => $addon->name, 'price' => $addon->price]) }}" 
-                                        class="addon-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                        data-price="{{ $addon->price }}"
-                                        {{ $isSelected ? 'checked' : '' }}>
-                                    <div>
-                                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 block">
-                                            {{ $addon->name }}
-                                        </span>
-                                        <span class="text-[10px] text-gray-500 dark:text-gray-400">
-                                            +Rp {{ number_format($addon->price, 0, ',', '.') }}
-                                        </span>
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    {{-- Harga & Estimasi --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-8 mt-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="p-5 bg-indigo-50 dark:bg-gray-900/50 rounded-xl border border-indigo-100 dark:border-gray-800 shadow-sm">
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                    Total Tagihan
-                                </h3>
-                                <div class="flex items-baseline gap-1">
-                                    <span class="text-2xl font-black text-indigo-600 dark:text-yellow-400">Rp <span id="display_total_price">{{ number_format($order->total_price, 0, ',', '.') }}</span></span>
-                                </div>
-                                <input type="hidden" id="total_price" name="total_price" value="{{ $order->total_price }}">
-                                <p class="text-[10px] text-gray-500 mt-1">*Otomatis terhitung dari Layanan + Add-Ons</p>
+                        <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Estimasi Selesai:</span>
+                                <span class="text-xs text-indigo-600 font-bold" x-text="item.estimated_days + ' Hari'"></span>
                             </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gray-500 block">Subtotal:</span>
+                                <span class="font-bold text-indigo-600 dark:text-indigo-400" x-text="'Rp ' + (item.total_price + item.additional_fees).toLocaleString('id-ID')"></span>
+                            </div>
+                        </div>
 
-                            <div class="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                    Biaya Tambahan
-                                </h3>
-                                <div class="flex items-baseline gap-1">
-                                    <span class="text-xl font-bold text-gray-700 dark:text-gray-300">Rp <span id="display_additional_fees">{{ number_format($order->additional_fees, 0, ',', '.') }}</span></span>
-                                </div>
-                                <input type="hidden" id="additional_fees" name="additional_fees" value="{{ $order->additional_fees }}">
+                        <input type="hidden" name="total_price" :value="item.total_price + item.additional_fees">
+                        <input type="hidden" name="additional_fees" :value="item.additional_fees">
+                    </div>
+
+                    {{-- Total Summary Box --}}
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-8">
+                        <div class="p-6 bg-indigo-50 dark:bg-gray-900 rounded-xl border border-indigo-100 dark:border-gray-800 shadow-sm">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                Ringkasan Pembayaran
+                            </h3>
+                            <div class="flex justify-between items-center pt-3 border-t border-indigo-200 dark:border-gray-700">
+                                <span class="text-xl font-bold text-gray-900 dark:text-white">Grand Total:</span>
+                                <span class="text-3xl font-black text-indigo-600 dark:text-yellow-400 tracking-tighter" x-text="'Rp ' + (item.total_price + item.additional_fees).toLocaleString('id-ID')"></span>
                             </div>
                         </div>
                     </div>
 
                     {{-- Pembayaran --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Pembayaran</h3>
-                        <div>
-                            <x-input-label for="payment_method" :value="__('Metode Pembayaran')" />
-                            <select id="payment_method" name="payment_method" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                @foreach(\App\Models\Order::paymentMethods() as $method)
-                                    <option value="{{ $method }}" {{ old('payment_method', $order->payment_method) == $method ? 'selected' : '' }}>{{ $method }}</option>
-                                @endforeach
-                            </select>
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Metode Pembayaran</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="payment_method" :value="__('Metode Pembayaran')" />
+                                <select id="payment_method" name="payment_method" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                    @foreach(\App\Models\Order::paymentMethods() as $method)
+                                        <option value="{{ $method }}" {{ $order->payment_method == $method ? 'selected' : '' }}>{{ $method }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     {{-- Catatan --}}
-                    <div>
-                        <x-input-label for="notes" :value="__('Catatan Tambahan')" />
+                    <div class="mt-4">
+                        <x-input-label for="notes" :value="__('Catatan Tambahan (Opsional)')" />
                         <textarea id="notes" name="notes" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3">{{ old('notes', $order->notes) }}</textarea>
                     </div>
 
@@ -197,92 +197,38 @@
         </div>
     </div>
 
-    @php
-        $specialTreatment = $services->filter(function($s) {
-            return in_array($s->name, ['Whitening (For Upper)', 'Unyellowing (For Midsole)', 'Brightening', 'All Special Treatment']);
-        })->values();
-        
-        $cleaning = $services->filter(function($s) {
-            return in_array($s->name, ['Deep Clean One Day', 'Deep Clean Two Days', 'Deep Clean Three Days', 'Deep Clean Four - Five Days', 'Express Clean (With Deep Clean)', 'Bag / Hat Cleaning', 'Special Condition', 'Reguler Clean']);
-        })->values();
-        
-        $repairTreatment = $services->filter(function($s) {
-            return in_array($s->name, ['Custom Repair', 'Re-Glue + Press', 'Re-Glue Manual']);
-        })->values();
-        
-        $repaintTreatment = $services->filter(function($s) {
-            return in_array($s->name, ['Repaint Canvas', 'Repaint Leather', 'Repaint Midsole', 'Change Colour Repaint']);
-        })->values();
-    @endphp
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const categorySelect = document.getElementById('service_category');
-            const serviceSelect = document.getElementById('service_name');
-            const addonCheckboxes = document.querySelectorAll('.addon-checkbox');
-            const additionalFeesInput = document.getElementById('additional_fees');
-            const totalPriceInput = document.getElementById('total_price');
-
-            const serviceMap = {
-                'Special Treatment': @json($specialTreatment),
-                'Cleaning': @json($cleaning),
-                'Repair Treatment': @json($repairTreatment),
-                'Repaint Treatment': @json($repaintTreatment),
-            };
-            const allServices = @json($services);
-
-            function calculateTotals() {
-                // Get service price
-                const selectedServiceOption = serviceSelect.options[serviceSelect.selectedIndex];
-                const servicePrice = selectedServiceOption ? parseInt(selectedServiceOption.dataset.price || 0) : 0;
-
-                // Get addons price
-                let addonsTotal = 0;
-                addonCheckboxes.forEach(cb => {
-                    if (cb.checked) {
-                        addonsTotal += parseInt(cb.dataset.price || 0);
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('orderForm', () => ({
+                services: @json($services),
+                additionalFeeOptions: @json($add_ons),
+                item: {
+                    service_name: '{{ $order->service_name }}',
+                    total_price: {{ $order->total_price - ($order->additional_fees ?? 0) }},
+                    additional_fees: {{ $order->additional_fees ?? 0 }},
+                    estimated_days: '{{ $order->estimated_days ?? "-" }}',
+                    selected_add_ons: @json($order->add_ons ? array_column($order->add_ons, 'name') : [])
+                },
+                updatePrice() {
+                    const service = this.services.find(s => s.name === this.item.service_name);
+                    if (service) {
+                        this.item.total_price = parseInt(service.price);
+                        this.item.estimated_days = service.estimated_days || '-';
                     }
-                });
-
-                const total = servicePrice + addonsTotal;
-
-                // Update inputs
-                additionalFeesInput.value = addonsTotal;
-                totalPriceInput.value = total;
-
-                // Update displays (formatted)
-                document.getElementById('display_additional_fees').textContent = addonsTotal.toLocaleString('id-ID');
-                document.getElementById('display_total_price').textContent = total.toLocaleString('id-ID');
-            }
-
-            if (categorySelect && serviceSelect) {
-                categorySelect.addEventListener('change', function() {
-                    const cat = this.value;
-                    const list = cat ? (serviceMap[cat] || []) : allServices;
-                    
-                    serviceSelect.innerHTML = '';
-                    list.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s.name;
-                        opt.dataset.price = s.price;
-                        opt.textContent = s.name + ' - Rp ' + parseInt(s.price).toLocaleString('id-ID');
-                        serviceSelect.appendChild(opt);
-                    });
-                    
-                    calculateTotals();
-                });
-            }
-
-            if (serviceSelect) {
-                serviceSelect.addEventListener('change', calculateTotals);
-            }
-
-            addonCheckboxes.forEach(cb => {
-                cb.addEventListener('change', calculateTotals);
-            });
-
-            // Initial calculation
-            calculateTotals();
-        });
+                },
+                toggleFee(feeName, feePrice, isChecked) {
+                    if (isChecked) {
+                        this.item.selected_add_ons.push(feeName);
+                        this.item.additional_fees += parseInt(feePrice);
+                    } else {
+                        const index = this.item.selected_add_ons.indexOf(feeName);
+                        if (index > -1) {
+                            this.item.selected_add_ons.splice(index, 1);
+                            this.item.additional_fees -= parseInt(feePrice);
+                        }
+                    }
+                }
+            }))
+        })
     </script>
 </x-app-layout>
