@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
             // Tambahkan kolom add_ons setelah additional_fees
-            $table->text('add_ons')->nullable()->before('additional_fees');
+            $table->text('add_ons')->nullable()->after('service_name');
         });
     }
 
