@@ -147,9 +147,10 @@ class ApiController extends Controller
         
         $stats = [
             'total_orders' => Order::count(),
-            'pending_orders' => Order::whereIn('status', ['Waiting', 'Received', 'In Progress'])->count(),
-            'completed_orders' => Order::where('status', 'Completed')->count(),
-            'recent_orders' => Order::latest()->take(5)->get(),
+            'pending_orders' => Order::where('status', 'pending')->count(),
+            'proses_orders' => Order::whereIn('status', ['waiting', 'proses'])->count(),
+            'unpaid_orders' => Order::where('payment_status', 'unpaid')->count(),
+            'recent_orders' => Order::latest()->take(10)->get(),
         ];
         
         return response()->json($stats);
