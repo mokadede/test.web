@@ -130,7 +130,7 @@
                                         <div>
                                             <x-input-label value="Kode Voucher" />
                                             <div class="mt-1 relative rounded-md shadow-sm">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                                <div class="absolute inset-y-0 left-0 pl-3 h-full flex items-center pointer-events-none text-gray-400">
                                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
                                                 </div>
                                                 <input type="text" name="code" x-model="form.code" required class="block w-full pl-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="Contoh: DISKON10">
@@ -154,9 +154,11 @@
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" x-text="form.discount_type === 'percent' ? 'Nilai Diskon (%)' : 'Nilai Diskon (Rp)'"></label>
                                                 <div class="mt-1 relative rounded-md shadow-sm">
-                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 h-full flex items-center pointer-events-none text-gray-400">
                                                         <template x-if="form.discount_type === 'percent'">
-                                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 14.25l6-6m4.5-3.45a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm0 12a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                                                            </svg>
                                                         </template>
                                                         <template x-if="form.discount_type === 'fixed'">
                                                             <span class="text-xs font-bold">Rp</span>
@@ -182,7 +184,7 @@
                                         <div>
                                             <x-input-label value="Mulai" />
                                             <div class="mt-1 relative rounded-md shadow-sm">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                                <div class="absolute inset-y-0 left-0 pl-3 h-full flex items-center pointer-events-none text-gray-400">
                                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                                 </div>
                                                 <input type="date" name="valid_from" x-model="form.valid_from" class="block w-full pl-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
@@ -191,7 +193,7 @@
                                         <div>
                                             <x-input-label value="Sampai" />
                                             <div class="mt-1 relative rounded-md shadow-sm">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                                <div class="absolute inset-y-0 left-0 pl-3 h-full flex items-center pointer-events-none text-gray-400">
                                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                                 </div>
                                                 <input type="date" name="valid_until" x-model="form.valid_until" class="block w-full pl-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
