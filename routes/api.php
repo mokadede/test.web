@@ -12,6 +12,7 @@ Route::post('/login', [ApiController::class, 'login']);
 Route::get('/services', [ApiController::class, 'services']);
 Route::get('/add_ons', [ApiController::class, 'addOns']);
 Route::post('/add_ons', [ApiController::class, 'storeAddOn']);
+Route::post('/orders', [OrderController::class, 'store']); // Public order creation
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -22,6 +23,4 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/vouchers', [ApiController::class, 'vouchers']);
     Route::get('/dashboard', [ApiController::class, 'dashboard']);
-    
-    Route::post('/orders', [OrderController::class, 'store']);
 });

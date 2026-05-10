@@ -83,7 +83,7 @@ class OrderController extends Controller
                 'notes' => $request->notes,
                 'voucher_code' => $voucherCode,
                 'discount_amount' => $discountAmount,
-                'created_by' => auth()->user()->name,
+                'created_by' => auth()->user() ? auth()->user()->name : ($request->created_by ?? 'Kasir POS'),
             ]);
 
             $createdOrders[] = $order;
