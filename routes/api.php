@@ -43,4 +43,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/employees', [\App\Http\Controllers\EmployeeController::class, 'store']);
     Route::put('/employees/{id}', [\App\Http\Controllers\EmployeeController::class, 'update']);
     Route::delete('/employees/{id}', [\App\Http\Controllers\EmployeeController::class, 'destroy']);
+    
+    Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index']);
 });
