@@ -27,6 +27,15 @@ class OrderController extends Controller
         return response()->json($query->get());
     }
 
+    public function show($id)
+    {
+        $order = Order::find($id);
+        if (!$order) {
+            return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
+        }
+        return response()->json($order);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
