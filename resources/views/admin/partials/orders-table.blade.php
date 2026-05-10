@@ -86,7 +86,7 @@
                     @endphp
                     <div class="mt-2">
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $colorClass }}">
-                            ⏱ {{ $order->estimated_days }} Hari
+                            ⏱ {{ $order->estimated_days }}{{ stripos($order->estimated_days, 'same day') === false ? ' Hari' : '' }}
                         </span>
                     </div>
                 @endif

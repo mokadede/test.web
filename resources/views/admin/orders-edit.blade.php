@@ -122,7 +122,7 @@
                         <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 flex justify-between items-center">
                             <div class="flex flex-col">
                                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Estimasi Selesai:</span>
-                                <span class="text-xs text-indigo-600 font-bold" x-text="item.estimated_days + ' Hari'"></span>
+                                <span class="text-xs text-indigo-600 font-bold" x-text="item.estimated_days + (item.estimated_days.toLowerCase().includes('same day') ? '' : ' Hari')"></span>
                             </div>
                             <div class="text-right">
                                 <span class="text-xs text-gray-500 block">Subtotal:</span>
