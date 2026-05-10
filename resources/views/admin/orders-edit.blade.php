@@ -109,7 +109,7 @@
                     {{-- Add-Ons Checkboxes --}}
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
                         <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Pilih Biaya Tambahan (Add-Ons)</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                             @foreach($add_ons as $addon)
                                 @php
                                     $isSelected = false;
@@ -122,32 +122,49 @@
                                         }
                                     }
                                 @endphp
-                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors shadow-sm">
                                     <input type="checkbox" name="add_ons[]" 
                                         value="{{ json_encode(['name' => $addon->name, 'price' => $addon->price]) }}" 
                                         class="addon-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                         data-price="{{ $addon->price }}"
                                         {{ $isSelected ? 'checked' : '' }}>
-                                    <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 transition">
-                                        {{ $addon->name }} (+{{ number_format($addon->price, 0, ',', '.') }})
-                                    </span>
+                                    <div>
+                                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 block">
+                                            {{ $addon->name }}
+                                        </span>
+                                        <span class="text-[10px] text-gray-500 dark:text-gray-400">
+                                            +Rp {{ number_format($addon->price, 0, ',', '.') }}
+                                        </span>
+                                    </div>
                                 </label>
                             @endforeach
                         </div>
                     </div>
 
                     {{-- Harga & Estimasi --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Harga & Estimasi</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label for="total_price" :value="__('Total Harga (Rp)')" />
-                                <x-text-input id="total_price" name="total_price" type="number" class="mt-1 block w-full bg-gray-50 font-bold" required value="{{ old('total_price', $order->total_price) }}" min="0" readonly />
-                                <p class="text-xs text-gray-500 mt-1">*Otomatis terhitung dari Layanan + Biaya Tambahan</p>
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-8 mt-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="p-5 bg-indigo-50 dark:bg-gray-900/50 rounded-xl border border-indigo-100 dark:border-gray-800 shadow-sm">
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    Total Tagihan
+                                </h3>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-black text-indigo-600 dark:text-yellow-400">Rp <span id="display_total_price">{{ number_format($order->total_price, 0, ',', '.') }}</span></span>
+                                </div>
+                                <input type="hidden" id="total_price" name="total_price" value="{{ $order->total_price }}">
+                                <p class="text-[10px] text-gray-500 mt-1">*Otomatis terhitung dari Layanan + Add-Ons</p>
                             </div>
-                            <div>
-                                <x-input-label for="additional_fees" :value="__('Biaya Tambahan (Rp)')" />
-                                <x-text-input id="additional_fees" name="additional_fees" type="number" class="mt-1 block w-full bg-gray-50" value="{{ old('additional_fees', $order->additional_fees) }}" min="0" readonly />
+
+                            <div class="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                    Biaya Tambahan
+                                </h3>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-xl font-bold text-gray-700 dark:text-gray-300">Rp <span id="display_additional_fees">{{ number_format($order->additional_fees, 0, ',', '.') }}</span></span>
+                                </div>
+                                <input type="hidden" id="additional_fees" name="additional_fees" value="{{ $order->additional_fees }}">
                             </div>
                         </div>
                     </div>
@@ -227,8 +244,15 @@
                     }
                 });
 
+                const total = servicePrice + addonsTotal;
+
+                // Update inputs
                 additionalFeesInput.value = addonsTotal;
-                totalPriceInput.value = servicePrice + addonsTotal;
+                totalPriceInput.value = total;
+
+                // Update displays (formatted)
+                document.getElementById('display_additional_fees').textContent = addonsTotal.toLocaleString('id-ID');
+                document.getElementById('display_total_price').textContent = total.toLocaleString('id-ID');
             }
 
             if (categorySelect && serviceSelect) {
