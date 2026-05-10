@@ -10,6 +10,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class ApiController extends Controller
 {
@@ -77,14 +78,18 @@ class ApiController extends Controller
 
     public function deleteService($id)
     {
-        \Log::info('Deleting service ID: ' . $id);
+        Log::info('Deleting service ID: ' . $id);
         try {
-            $service = Service::find($id);
-            if ($service) $service->delete();
-            return response()->json(['success' => true]);
+            $deleted = Service::where('id', $id)->delete();
+            Log::info('Deleted service count: ' . $deleted);
+            return response()->json(['success' => true, 'deleted' => $deleted]);
         } catch (\Exception $e) {
-            \Log::error('Error deleting service: ' . $e->getMessage());
-            return response()->json(['message' => $e->getMessage()], 500);
+            Log::error('Error deleting service: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Server Error: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
         }
     }
 
@@ -102,18 +107,18 @@ class ApiController extends Controller
 
     public function deleteAddOn($id)
     {
-        \Log::info('Deleting add-on ID: ' . $id);
+        Log::info('Attempting to delete add-on ID: ' . $id);
         try {
-            $addon = AddOn::find($id);
-            if (!$addon) {
-                \Log::warning('Add-on not found: ' . $id);
-                return response()->json(['message' => 'Not found'], 404);
-            }
-            $addon->delete();
-            return response()->json(['success' => true]);
+            $deleted = AddOn::where('id', $id)->delete();
+            Log::info('Deleted count: ' . $deleted);
+            return response()->json(['success' => true, 'deleted' => $deleted]);
         } catch (\Exception $e) {
-            \Log::error('Error deleting add-on: ' . $e->getMessage());
-            return response()->json(['message' => $e->getMessage()], 500);
+            Log::error('CRITICAL ERROR deleting add-on: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Server Error: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
         }
     }
     
