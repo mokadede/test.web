@@ -50,15 +50,21 @@ class ApiController extends Controller
 
     public function storeService(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'price' => 'required|numeric',
-            'category' => 'nullable|string',
-            'estimated_days' => 'nullable|string',
-        ]);
+        \Log::info('Storing service: ', $request->all());
+        try {
+            $request->validate([
+                'name' => 'required|string',
+                'price' => 'required|numeric',
+                'category' => 'nullable|string',
+                'estimated_days' => 'nullable|string',
+            ]);
 
-        $service = Service::create($request->all());
-        return response()->json($service);
+            $service = Service::create($request->all());
+            return response()->json($service);
+        } catch (\Exception $e) {
+            \Log::error('Error storing service: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function updateService(Request $request, $id)
@@ -71,9 +77,15 @@ class ApiController extends Controller
 
     public function deleteService($id)
     {
-        $service = Service::find($id);
-        if ($service) $service->delete();
-        return response()->json(['success' => true]);
+        \Log::info('Deleting service ID: ' . $id);
+        try {
+            $service = Service::find($id);
+            if ($service) $service->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting service: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function addOns()
@@ -90,9 +102,19 @@ class ApiController extends Controller
 
     public function deleteAddOn($id)
     {
-        $addon = AddOn::find($id);
-        if ($addon) $addon->delete();
-        return response()->json(['success' => true]);
+        \Log::info('Deleting add-on ID: ' . $id);
+        try {
+            $addon = AddOn::find($id);
+            if (!$addon) {
+                \Log::warning('Add-on not found: ' . $id);
+                return response()->json(['message' => 'Not found'], 404);
+            }
+            $addon->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting add-on: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
     
     public function vouchers()
