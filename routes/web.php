@@ -60,6 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/vouchers', [AdminController::class, 'vouchers'])->name('admin.vouchers');
         Route::post('/admin/vouchers', [AdminController::class, 'storeVoucher'])->name('admin.vouchers.store');
         Route::patch('/admin/vouchers/{voucher}', [AdminController::class, 'updateVoucher'])->name('admin.vouchers.update');
+        Route::patch('/admin/vouchers/{voucher}/toggle', [AdminController::class, 'toggleVoucherStatus'])->name('admin.vouchers.toggle');
         Route::delete('/admin/vouchers/{voucher}', [AdminController::class, 'destroyVoucher'])->name('admin.vouchers.destroy');
         Route::post('/admin/vouchers/check', [\App\Http\Controllers\VoucherController::class, 'check'])->name('admin.vouchers.check');
     });

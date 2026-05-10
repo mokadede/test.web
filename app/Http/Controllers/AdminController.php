@@ -351,6 +351,7 @@ class AdminController extends Controller
             'max_uses' => 'nullable|integer',
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date',
+            'is_active' => 'boolean',
         ]);
         \App\Models\Voucher::create($request->all());
         return back()->with('success', 'Voucher berhasil dibuat.');
@@ -361,6 +362,13 @@ class AdminController extends Controller
         $this->checkOwner();
         $voucher->delete();
         return back()->with('success', 'Voucher berhasil dihapus.');
+    }
+
+    public function toggleVoucherStatus(\App\Models\Voucher $voucher)
+    {
+        $this->checkOwner();
+        $voucher->update(['is_active' => !$voucher->is_active]);
+        return back()->with('success', 'Status voucher berhasil diperbarui.');
     }
 
     public function updateVoucher(Request $request, \App\Models\Voucher $voucher)

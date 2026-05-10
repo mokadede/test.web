@@ -16,7 +16,8 @@
             min_order: 0,
             max_uses: 100,
             valid_from: '{{ date('Y-m-d') }}',
-            valid_until: '{{ date('Y-m-d', strtotime('+1 month')) }}'
+            valid_until: '{{ date('Y-m-d', strtotime('+1 month')) }}',
+            is_active: true
         },
         resetForm() {
             this.form = {
@@ -27,7 +28,8 @@
                 min_order: 0,
                 max_uses: 100,
                 valid_from: '{{ date('Y-m-d') }}',
-                valid_until: '{{ date('Y-m-d', strtotime('+1 month')) }}'
+                valid_until: '{{ date('Y-m-d', strtotime('+1 month')) }}',
+                is_active: true
             };
         }
     }">
@@ -42,7 +44,7 @@
                 <div class="flex justify-between items-center mb-6 border-b pb-4 dark:border-gray-700">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
-                        Daftar Voucher Aktif
+                        Daftar Voucher & Status
                     </h3>
                     <button @click="resetForm(); addOpen = true" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow flex items-center gap-2 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -56,6 +58,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Voucher</th>
                                 <th class="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Diskon</th>
+                                <th class="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Kuota</th>
                                 <th class="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Berlaku</th>
                                 <th class="px-6 py-3 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -67,6 +70,14 @@
                                 <td class="px-6 py-4 whitespace-nowrap font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest text-sm">{{ $voucher->code }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-semibold">
                                     {{ $voucher->discount_type == 'fixed' ? 'Rp '.number_format($voucher->discount_amount,0,',','.') : $voucher->discount_amount.'%' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <form action="{{ route('admin.vouchers.toggle', $voucher) }}" method="POST">
+                                        @csrf @method('PATCH')
+                                        <button type="submit" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $voucher->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                            {{ $voucher->is_active ? 'Active' : 'Inactive' }}
+                                        </button>
+                                    </form>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">
                                     {{ $voucher->used_count }} / {{ $voucher->max_uses ?: '∞' }}
@@ -84,8 +95,9 @@
                                             min_order: '{{ $voucher->min_order }}',
                                             max_uses: '{{ $voucher->max_uses }}',
                                             valid_from: '{{ $voucher->valid_from ? $voucher->valid_from->format('Y-m-d') : '' }}',
-                                            valid_until: '{{ $voucher->valid_until ? $voucher->valid_until->format('Y-m-d') : '' }}'
-                                        }" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md shadow flex items-center gap-1 transition">
+                                            valid_until: '{{ $voucher->valid_until ? $voucher->valid_until->format('Y-m-d') : '' }}',
+                                            is_active: {{ $voucher->is_active ? 'true' : 'false' }}
+                                        }" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md shadow flex items-center gap-1 transition">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                             Edit
                                         </button>
@@ -106,7 +118,7 @@
             </div>
         </div>
 
-        {{-- Voucher Modal (Frame following Service Modal style) --}}
+        {{-- Voucher Modal --}}
         <template x-if="addOpen || editOpen">
             <div class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
                 <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -120,7 +132,7 @@
                                 <input type="hidden" name="_method" value="PATCH">
                             </template>
 
-                            {{-- Modal Header (Styled like Services) --}}
+                            {{-- Modal Header --}}
                             <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6 border-b pb-2" x-text="editOpen ? 'Edit Data Voucher' : 'Tambah Voucher Baru'"></h3>
                                 
@@ -173,9 +185,21 @@
                                             </div>
                                         </div>
 
-                                        <div>
-                                            <x-input-label value="Min. Order (Rp)" />
-                                            <input type="number" name="min_order" x-model="form.min_order" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <x-input-label value="Min. Order (Rp)" />
+                                                <input type="number" name="min_order" x-model="form.min_order" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                            </div>
+                                            <div>
+                                                <x-input-label value="Status Voucher" />
+                                                <div class="mt-2 flex items-center">
+                                                    <label class="inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" name="is_active" x-model="form.is_active" class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600 relative"></div>
+                                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300" x-text="form.is_active ? 'Active' : 'Inactive'"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -203,7 +227,7 @@
                                 </div>
                             </div>
 
-                            {{-- Modal Footer (Styled like Services) --}}
+                            {{-- Modal Footer --}}
                             <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 flex flex-row-reverse gap-2">
                                 <x-primary-button type="submit" x-text="editOpen ? 'Update Voucher' : 'Simpan Voucher'"></x-primary-button>
                                 <x-secondary-button type="button" @click="addOpen = false; editOpen = false">Batal</x-secondary-button>
