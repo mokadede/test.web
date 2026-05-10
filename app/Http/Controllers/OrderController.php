@@ -52,6 +52,9 @@ class OrderController extends Controller
             'items.*.additional_fees' => 'nullable|integer|min:0',
             'items.*.total_price' => 'required|integer|min:0',
             'items.*.estimated_days' => 'nullable|string|max:100',
+            'items.*.add_ons' => 'nullable|array',
+            'items.*.add_ons.*.name' => 'nullable|string|max:255',
+            'items.*.add_ons.*.price' => 'nullable|integer|min:0',
         ]);
 
         $sharedOrderNumber = Order::generateOrderNumber();
@@ -105,6 +108,7 @@ class OrderController extends Controller
                 'additional_fees' => $additionalFees,
                 'total_price' => $totalPrice,
                 'estimated_days' => $item['estimated_days'] ?? ($service ? $service->estimated_days : null),
+                'add_ons' => isset($item['add_ons']) ? json_encode($item['add_ons']) : null,
                 'payment_method' => $request->payment_method,
                 'payment_status' => 'unpaid',
                 'status' => 'Waiting', // Default status
@@ -143,7 +147,16 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
         }
         
-        $order->update($request->only(['status', 'payment_status', 'notes', 'customer_name', 'phone_number']));
+        $order->update($request->only([
+            'status', 'payment_status', 'notes', 'customer_name', 'phone_number',
+            'shoe_brand', 'shoe_size', 'shoe_condition', 'service_name',
+            'additional_fees', 'add_ons', 'total_price', 'estimated_days', 'payment_method'
+        ]));
+        
+        // If add_ons is passed as array, encode it to JSON
+        if ($request->has('add_ons') && is_array($request->add_ons)) {
+            $order->update(['add_ons' => json_encode($request->add_ons)]);
+        }
         
         return response()->json([
             'success' => true,
