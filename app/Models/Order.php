@@ -10,6 +10,10 @@ class Order extends Model
     protected $primaryKey = 'order_id';
 
     protected $guarded = [];
+    
+    protected $casts = [
+        'add_ons' => 'array',
+    ];
 
     /**
      * Get the formatted order ID with KC- prefix and random 5 chars.

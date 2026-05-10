@@ -106,17 +106,48 @@
                         </div>
                     </div>
 
+                    {{-- Add-Ons Checkboxes --}}
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Pilih Biaya Tambahan (Add-Ons)</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            @foreach($add_ons as $addon)
+                                @php
+                                    $isSelected = false;
+                                    if ($order->add_ons) {
+                                        foreach ($order->add_ons as $item) {
+                                            if (is_array($item) && $item['name'] === $addon->name) {
+                                                $isSelected = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <input type="checkbox" name="add_ons[]" 
+                                        value="{{ json_encode(['name' => $addon->name, 'price' => $addon->price]) }}" 
+                                        class="addon-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        data-price="{{ $addon->price }}"
+                                        {{ $isSelected ? 'checked' : '' }}>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 transition">
+                                        {{ $addon->name }} (+{{ number_format($addon->price, 0, ',', '.') }})
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
                     {{-- Harga & Estimasi --}}
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
                         <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Harga & Estimasi</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <x-input-label for="total_price" :value="__('Total Harga (Rp)')" />
-                                <x-text-input id="total_price" name="total_price" type="number" class="mt-1 block w-full" required value="{{ old('total_price', $order->total_price) }}" min="0" />
+                                <x-text-input id="total_price" name="total_price" type="number" class="mt-1 block w-full bg-gray-50 font-bold" required value="{{ old('total_price', $order->total_price) }}" min="0" readonly />
+                                <p class="text-xs text-gray-500 mt-1">*Otomatis terhitung dari Layanan + Biaya Tambahan</p>
                             </div>
                             <div>
                                 <x-input-label for="additional_fees" :value="__('Biaya Tambahan (Rp)')" />
-                                <x-text-input id="additional_fees" name="additional_fees" type="number" class="mt-1 block w-full" value="{{ old('additional_fees', $order->additional_fees) }}" min="0" />
+                                <x-text-input id="additional_fees" name="additional_fees" type="number" class="mt-1 block w-full bg-gray-50" value="{{ old('additional_fees', $order->additional_fees) }}" min="0" readonly />
                             </div>
                         </div>
                     </div>
@@ -171,6 +202,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const categorySelect = document.getElementById('service_category');
             const serviceSelect = document.getElementById('service_name');
+            const addonCheckboxes = document.querySelectorAll('.addon-checkbox');
+            const additionalFeesInput = document.getElementById('additional_fees');
             const totalPriceInput = document.getElementById('total_price');
 
             const serviceMap = {
@@ -180,6 +213,23 @@
                 'Repaint Treatment': @json($repaintTreatment),
             };
             const allServices = @json($services);
+
+            function calculateTotals() {
+                // Get service price
+                const selectedServiceOption = serviceSelect.options[serviceSelect.selectedIndex];
+                const servicePrice = selectedServiceOption ? parseInt(selectedServiceOption.dataset.price || 0) : 0;
+
+                // Get addons price
+                let addonsTotal = 0;
+                addonCheckboxes.forEach(cb => {
+                    if (cb.checked) {
+                        addonsTotal += parseInt(cb.dataset.price || 0);
+                    }
+                });
+
+                additionalFeesInput.value = addonsTotal;
+                totalPriceInput.value = servicePrice + addonsTotal;
+            }
 
             if (categorySelect && serviceSelect) {
                 categorySelect.addEventListener('change', function() {
@@ -195,19 +245,20 @@
                         serviceSelect.appendChild(opt);
                     });
                     
-                    if (list.length > 0) {
-                        totalPriceInput.value = list[0].price;
-                    }
+                    calculateTotals();
                 });
             }
 
             if (serviceSelect) {
-                serviceSelect.addEventListener('change', function() {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const price = selectedOption.dataset.price || 0;
-                    totalPriceInput.value = price;
-                });
+                serviceSelect.addEventListener('change', calculateTotals);
             }
+
+            addonCheckboxes.forEach(cb => {
+                cb.addEventListener('change', calculateTotals);
+            });
+
+            // Initial calculation
+            calculateTotals();
         });
     </script>
 </x-app-layout>

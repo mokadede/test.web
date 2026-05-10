@@ -84,7 +84,8 @@ class AdminController extends Controller
     public function editOrder(Order $order)
     {
         $services = Service::all();
-        return view('admin.orders-edit', compact('order', 'services'));
+        $add_ons = \App\Models\AddOn::all();
+        return view('admin.orders-edit', compact('order', 'services', 'add_ons'));
     }
 
     public function updateOrder(Request $request, Order $order)
@@ -102,6 +103,7 @@ class AdminController extends Controller
             'payment_status' => 'required|in:unpaid,paid',
             'status' => 'required|string',
             'notes' => 'nullable|string',
+            'add_ons' => 'nullable|array',
         ]);
 
         // Auto-set category and estimated_days from service
@@ -122,6 +124,7 @@ class AdminController extends Controller
             'payment_status' => $request->payment_status,
             'status' => $request->status,
             'notes' => $request->notes,
+            'add_ons' => $request->add_ons,
         ]);
 
         return redirect()->route('admin.orders')->with('success', 'Data pesanan berhasil diperbarui.');
