@@ -33,7 +33,7 @@ class OrderController extends Controller
             $query->whereDate('created_at', '<=', $request->end_date);
         }
 
-        return response()->json($query->get());
+        return response()->json($query->paginate(10));
     }
 
     public function show($id)
