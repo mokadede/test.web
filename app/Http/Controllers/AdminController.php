@@ -361,7 +361,7 @@ class AdminController extends Controller
     public function storeVoucher(Request $request)
     {
         $this->checkOwner();
-        $request->validate([
+        $validated = $request->validate([
             'code' => 'required|unique:vouchers',
             'discount_amount' => 'required|numeric',
             'discount_type' => 'required|in:fixed,percent',
@@ -369,9 +369,12 @@ class AdminController extends Controller
             'max_uses' => 'nullable|integer',
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date',
-            'is_active' => 'boolean',
+            'is_active' => 'sometimes',
         ]);
-        \App\Models\Voucher::create($request->all());
+        
+        $validated['is_active'] = $request->has('is_active');
+        
+        \App\Models\Voucher::create($validated);
         return back()->with('success', 'Voucher berhasil dibuat.');
     }
 
@@ -392,7 +395,7 @@ class AdminController extends Controller
     public function updateVoucher(Request $request, \App\Models\Voucher $voucher)
     {
         $this->checkOwner();
-        $request->validate([
+        $validated = $request->validate([
             'code' => 'required|unique:vouchers,code,' . $voucher->id,
             'discount_amount' => 'required|numeric',
             'discount_type' => 'required|in:fixed,percent',
@@ -400,8 +403,12 @@ class AdminController extends Controller
             'max_uses' => 'nullable|integer',
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date',
+            'is_active' => 'sometimes',
         ]);
-        $voucher->update($request->all());
+
+        $validated['is_active'] = $request->has('is_active');
+
+        $voucher->update($validated);
         return back()->with('success', 'Voucher berhasil diperbarui.');
     }
 

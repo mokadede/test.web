@@ -6,18 +6,18 @@
     </x-slot>
 
     <div class="py-12" x-data="{ 
-        addOpen: false,
-        editOpen: false, 
+        addOpen: {{ $errors->any() && !old('id') ? 'true' : 'false' }},
+        editOpen: {{ $errors->any() && old('id') ? 'true' : 'false' }}, 
         form: {
-            id: '',
-            code: '',
-            discount_type: 'percent',
-            discount_amount: '',
-            min_order: 0,
-            max_uses: 100,
-            valid_from: '{{ date('Y-m-d') }}',
-            valid_until: '{{ date('Y-m-d', strtotime('+1 month')) }}',
-            is_active: true
+            id: '{{ old('id', '') }}',
+            code: '{{ old('code', '') }}',
+            discount_type: '{{ old('discount_type', 'percent') }}',
+            discount_amount: '{{ old('discount_amount', '') }}',
+            min_order: '{{ old('min_order', 0) }}',
+            max_uses: '{{ old('max_uses', 100) }}',
+            valid_from: '{{ old('valid_from', date('Y-m-d')) }}',
+            valid_until: '{{ old('valid_until', date('Y-m-d', strtotime('+1 month'))) }}',
+            is_active: {{ old('is_active', true) ? 'true' : 'false' }}
         },
         resetForm() {
             this.form = {
@@ -37,6 +37,17 @@
             @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-sm">
                     {{ session('success') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative shadow-sm">
+                    <strong class="font-bold">Terjadi kesalahan!</strong>
+                    <ul class="mt-2 list-disc list-inside text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 
@@ -128,6 +139,7 @@
                     <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                         <form :action="editOpen ? '/admin/vouchers/' + form.id : '{{ route('admin.vouchers.store') }}'" method="POST">
                             @csrf
+                            <input type="hidden" name="id" x-model="form.id">
                             <template x-if="editOpen">
                                 <input type="hidden" name="_method" value="PATCH">
                             </template>
@@ -147,6 +159,7 @@
                                                 </div>
                                                 <input type="text" name="code" x-model="form.code" required class="block w-full pl-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="Contoh: DISKON10">
                                             </div>
+                                            @error('code') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                         </div>
 
                                         <div>
@@ -178,10 +191,12 @@
                                                     </div>
                                                     <input type="number" name="discount_amount" x-model="form.discount_amount" required class="block w-full pl-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                                                 </div>
+                                                @error('discount_amount') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                             </div>
                                             <div>
                                                 <x-input-label value="Maks. Pakai" />
                                                 <input type="number" name="max_uses" x-model="form.max_uses" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                                @error('max_uses') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                             </div>
                                         </div>
 
@@ -189,12 +204,13 @@
                                             <div>
                                                 <x-input-label value="Min. Order (Rp)" />
                                                 <input type="number" name="min_order" x-model="form.min_order" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                                @error('min_order') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                             </div>
                                             <div>
                                                 <x-input-label value="Status Voucher" />
                                                 <div class="mt-2 flex items-center">
                                                     <label class="inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" name="is_active" x-model="form.is_active" class="sr-only peer">
+                                                        <input type="checkbox" name="is_active" value="1" x-model="form.is_active" class="sr-only peer">
                                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600 relative"></div>
                                                         <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300" x-text="form.is_active ? 'Active' : 'Inactive'"></span>
                                                     </label>
@@ -213,6 +229,7 @@
                                                 </div>
                                                 <input type="date" name="valid_from" x-model="form.valid_from" class="block w-full pl-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                                             </div>
+                                            @error('valid_from') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                         </div>
                                         <div>
                                             <x-input-label value="Sampai" />
@@ -222,6 +239,7 @@
                                                 </div>
                                                 <input type="date" name="valid_until" x-model="form.valid_until" class="block w-full pl-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                                             </div>
+                                            @error('valid_until') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                         </div>
                                     </div>
                                 </div>
