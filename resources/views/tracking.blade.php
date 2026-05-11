@@ -83,7 +83,7 @@
             <div class="nav-links">
                 <a href="/">Beranda</a>
                 @auth
-                    <a href="{{ url('/dashboard') }}">Dashboard</a>
+                    <a href="{{ url('/dashboard') }}" class="nav-cta" style="padding: 10px 24px !important; background: #FEFE01 !important; color: #000 !important; font-weight: 800 !important; border-radius: 6px !important; font-size: 0.8rem !important; letter-spacing: 1px !important; transition: all 0.3s !important; text-transform: uppercase !important;">Dashboard</a>
                 @endauth
                 <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle Theme">
                     <svg class="sun-icon" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>

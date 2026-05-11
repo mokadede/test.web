@@ -67,8 +67,8 @@
         .nav-links { display: flex; align-items: center; gap: 2rem; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         .nav-links a { color: #f0f0f0 !important; transition: color 0.3s; }
         .nav-links a:hover { color: var(--neon) !important; }
-        .nav-cta { padding: 10px 24px; background: var(--neon); color: #000 !important; font-weight: 800; border-radius: 6px; font-size: 0.8rem; letter-spacing: 1px; transition: all 0.3s; }
-        .nav-cta:hover { background: #fff; color: #000 !important; box-shadow: 0 0 20px rgba(254,254,1,0.4); }
+        .nav-links a.nav-cta { padding: 10px 24px !important; background: #FEFE01 !important; color: #000000 !important; font-weight: 900 !important; border-radius: 6px; font-size: 0.8rem; letter-spacing: 1px; transition: all 0.3s; text-decoration: none !important; text-transform: uppercase; text-shadow: none !important; }
+        .nav-links a.nav-cta:hover { background: #ffffff !important; color: #000000 !important; box-shadow: 0 0 20px rgba(254,254,1,0.6); }
         .hamburger { display: none; background: none; border: none; cursor: pointer; }
         .hamburger svg { width: 28px; height: 28px; stroke: var(--neon); }
         .theme-toggle-btn { background: none; border: none; cursor: pointer; color: #f0f0f0 !important; display: flex; align-items: center; justify-content: center; position: relative; width: 24px; height: 24px; }
@@ -190,7 +190,7 @@
             <a href="#process">Proses</a>
             <a href="{{ route('track') }}">Lacak Pesanan</a>
             @auth
-                <a href="{{ url('/dashboard') }}" class="nav-cta">Dashboard</a>
+                <a href="{{ url('/dashboard') }}" class="nav-cta" style="color: #000 !important; background: #FEFE01 !important; font-weight: 900 !important;">Dashboard</a>
             @endauth
         </div>
         <div style="display: flex; gap: 1rem; align-items: center;">
