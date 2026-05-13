@@ -11,6 +11,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/old-welcome', function () {
+    return view('welcome_old');
+});
+
 // Public tracking page (no login required)
 Route::get('/track', [TrackingController::class, 'index'])->name('track');
 Route::post('/track', [TrackingController::class, 'search'])->name('track.search');
