@@ -15,7 +15,7 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && in_array(auth()->user()->role, ['owner', 'karyawan'])) {
+        if (auth()->check() && in_array(auth()->user()->role, ['owner'/*, 'karyawan'*/])) {
             return $next($request);
         }
 

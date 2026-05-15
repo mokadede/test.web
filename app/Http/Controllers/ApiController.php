@@ -30,6 +30,13 @@ class ApiController extends Controller
             ]);
         }
 
+        // Prevent 'karyawan' role from logging in via API (as requested)
+        if ($user->role === 'karyawan') {
+            return response()->json([
+                'message' => 'Akses login untuk role karyawan saat ini dinonaktifkan.',
+            ], 403);
+        }
+
         $token = $user->createToken($request->device_name ?? 'mobile_app')->plainTextToken;
 
         return response()->json([
@@ -60,18 +67,18 @@ class ApiController extends Controller
     {
         \Log::info('Storing service: ', $request->all());
         try {
-            $request->validate([
+            $validated = $request->validate([
                 'name' => 'required|string',
                 'price' => 'required|numeric',
                 'category' => 'nullable|string',
                 'estimated_days' => 'nullable|string',
             ]);
 
-            $service = Service::create($request->all());
+            $service = Service::create($validated);
             return response()->json($service);
         } catch (\Throwable $e) {
             \Log::error('Error storing service: ' . $e->getMessage());
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Terjadi kesalahan pada server.'], 500);
         }
     }
 
@@ -93,9 +100,7 @@ class ApiController extends Controller
         } catch (\Throwable $e) {
             Log::error('Error deleting service: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Server Error: ' . $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'message' => 'Terjadi kesalahan pada server.',
             ], 500);
         }
     }
@@ -114,8 +119,8 @@ class ApiController extends Controller
 
     public function storeAddOn(Request $request)
     {
-        $request->validate(['name' => 'required', 'price' => 'required']);
-        $addon = AddOn::create($request->all());
+        $validated = $request->validate(['name' => 'required', 'price' => 'required']);
+        $addon = AddOn::create($validated);
         return response()->json($addon);
     }
 
@@ -129,9 +134,7 @@ class ApiController extends Controller
         } catch (\Throwable $e) {
             Log::error('CRITICAL ERROR deleting add-on: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Server Error: ' . $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'message' => 'Terjadi kesalahan pada server.',
             ], 500);
         }
     }

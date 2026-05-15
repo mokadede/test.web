@@ -167,76 +167,16 @@ class AdminController extends Controller
         abort_if(auth()->user()->role !== 'owner', 403, 'Akses ditolak. Hanya untuk Owner.');
     }
 
-    public function dashboard(\Illuminate\Http\Request $request)
+    public function dashboard()
     {
         $this->checkOwner();
         
-        $currentYear = date('Y');
-        $query = Order::where('payment_status', 'paid');
-
-        // Apply date filters if provided, otherwise default to current year
-        if ($request->filled('start_date') || $request->filled('end_date')) {
-            if ($request->filled('start_date')) {
-                $query->whereDate('created_at', '>=', $request->start_date);
-            }
-            if ($request->filled('end_date')) {
-                $query->whereDate('created_at', '<=', $request->end_date);
-            }
-        } else {
-            $query->whereYear('created_at', $currentYear);
-        }
-
-        $orders = $query->get();
-            
-        $chartData = array_fill(1, 12, 0);
-        $totalRevenue = 0;
-        $totalPaidOrders = $orders->count();
-        $serviceCounts = [];
-
-        foreach ($orders as $order) {
-            $month = (int) $order->created_at->format('m');
-            $chartData[$month] += $order->total_price;
-            $totalRevenue += $order->total_price;
-
-            if ($order->service_name) {
-                if (!isset($serviceCounts[$order->service_name])) {
-                    $serviceCounts[$order->service_name] = 0;
-                }
-                $serviceCounts[$order->service_name]++;
-            }
-        }
-
-        arsort($serviceCounts);
-        $topService = key($serviceCounts);
-
-        $summary = [
-            'total_revenue' => $totalRevenue,
-            'total_orders' => $totalPaidOrders,
-            'top_service' => $topService,
-            'year' => $currentYear
-        ];
-
-        // Sort orders descending by created_at for the table
-        $recentOrders = $orders->sortByDesc('created_at')->take(10); // Show latest 10 or all? Let's just pass all $orders and let view handle it or just recent 10. Let's pass $recentOrders.
-        // Actually, "rincian order customer" usually means the list of orders that made up the chart. Let's pass all orders, or paginate.
-        // Since it's a dashboard, maybe just recent ones, or all orders in the current year. Let's pass the $orders collection we already queried.
-        // We'll pass it as $orders.
-
-        if (request()->ajax()) {
-            return response()->json([
-                'chartData' => array_values($chartData),
-                'summary' => $summary,
-                'summary_formatted' => [
-                    'revenue' => 'Rp ' . number_format($summary['total_revenue'], 0, ',', '.'),
-                    'orders' => $summary['total_orders'] . ' Pesanan',
-                    'top_service' => $summary['top_service'] ?: 'Belum Ada',
-                    'year_text' => request('start_date') || request('end_date') ? '(Filter Aktif)' : 'Tahun ' . $summary['year']
-                ],
-                'html' => view('admin.partials.dashboard-orders', compact('orders'))->render()
-            ]);
-        }
-
-        return view('admin.dashboard', compact('chartData', 'summary', 'orders'));
+        $totalArticles = \App\Models\Article::count();
+        $publishedArticles = \App\Models\Article::where('is_published', true)->count();
+        $draftArticles = $totalArticles - $publishedArticles;
+        $latestArticles = \App\Models\Article::latest()->take(5)->get();
+        
+        return view('admin.dashboard', compact('totalArticles', 'publishedArticles', 'draftArticles', 'latestArticles'));
     }
 
     public function exportExcel(Request $request)

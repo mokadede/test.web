@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
-    protected $guarded = [];
+    protected $fillable = ['category', 'name', 'price', 'estimated_days', 'description'];
 
     /**
      * Set the estimated_days to take only the maximum number if it's a range.

@@ -5,11 +5,12 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ArticleController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [ArticleController::class, 'index'])->name('home');
+Route::get('/articles', [ArticleController::class, 'blogIndex'])->name('articles.index');
+Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 // Public tracking page (no login required)
 Route::get('/track', [TrackingController::class, 'index'])->name('track');
@@ -20,8 +21,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         if (auth()->user()->role === 'owner') {
             return redirect()->route('admin.dashboard');
         }
-        // Karyawan dan semua role lainnya ke halaman pesanan
-        return redirect()->route('admin.orders');
+        // Karyawan dan semua role lainnya ke halaman pesanan (Dinonaktifkan)
+        // return redirect()->route('admin.orders');
+        Auth::logout();
+        return redirect()->route('login')->with('error', 'Login karyawan dinonaktifkan.');
     })->name('dashboard');
 
     Route::middleware('is_admin')->group(function () {
@@ -65,6 +68,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/admin/vouchers/{voucher}/toggle', [AdminController::class, 'toggleVoucherStatus'])->name('admin.vouchers.toggle');
         Route::delete('/admin/vouchers/{voucher}', [AdminController::class, 'destroyVoucher'])->name('admin.vouchers.destroy');
         Route::post('/admin/vouchers/check', [\App\Http\Controllers\VoucherController::class, 'check'])->name('admin.vouchers.check');
+
+        // Articles
+        Route::get('/admin/articles', [ArticleController::class, 'adminIndex'])->name('admin.articles');
+        Route::get('/admin/articles/create', [ArticleController::class, 'create'])->name('admin.articles.create');
+        Route::post('/admin/articles', [ArticleController::class, 'store'])->name('admin.articles.store');
+        Route::post('/admin/articles/upload-image', [ArticleController::class, 'uploadImage'])->name('admin.articles.upload_image');
+        Route::get('/admin/articles/{article}/edit', [ArticleController::class, 'edit'])->name('admin.articles.edit');
+        Route::patch('/admin/articles/{article}', [ArticleController::class, 'update'])->name('admin.articles.update');
+        Route::patch('/admin/articles/{article}/toggle', [ArticleController::class, 'togglePublish'])->name('admin.articles.toggle');
+        Route::delete('/admin/articles/{article}', [ArticleController::class, 'destroy'])->name('admin.articles.destroy');
     });
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

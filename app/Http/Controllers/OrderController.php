@@ -33,8 +33,8 @@ class OrderController extends Controller
             $query->whereDate('created_at', '<=', $request->end_date);
         }
 
-        if ($request->all) {
-            return response()->json($query->get());
+        if ($request->all && auth()->user()->role === 'owner') {
+            return response()->json($query->limit(500)->get());
         }
 
         return response()->json($query->paginate($request->per_page ?? 10));
@@ -158,16 +158,32 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
         }
         
-        $order->update($request->only([
-            'status', 'payment_status', 'notes', 'customer_name', 'phone_number',
-            'shoe_brand', 'shoe_size', 'shoe_condition', 'service_name',
-            'additional_fees', 'add_ons', 'total_price', 'estimated_days', 'payment_method',
-            'voucher_code', 'discount_amount'
-        ]));
+        $validated = $request->validate([
+            'status' => 'nullable|string',
+            'payment_status' => 'nullable|in:unpaid,paid',
+            'notes' => 'nullable|string',
+            'customer_name' => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'shoe_brand' => 'nullable|string|max:255',
+            'shoe_size' => 'nullable|string|max:50',
+            'shoe_condition' => 'nullable|string|max:100',
+            'service_name' => 'nullable|string|max:255',
+            'additional_fees' => 'nullable|integer|min:0',
+            'total_price' => 'nullable|integer|min:0',
+            'estimated_days' => 'nullable|string|max:100',
+            'payment_method' => 'nullable|string',
+            'voucher_code' => 'nullable|string',
+            'discount_amount' => 'nullable|numeric',
+        ]);
+        
+        $order->update($validated);
         
         // If add_ons is passed as array, encode it to JSON
-        if ($request->has('add_ons') && is_array($request->add_ons)) {
-            $order->update(['add_ons' => json_encode($request->add_ons)]);
+        if ($request->has('add_ons')) {
+            $addOns = is_array($request->add_ons) ? $request->add_ons : json_decode($request->add_ons, true);
+            if ($addOns !== null) {
+                $order->update(['add_ons' => json_encode($addOns)]);
+            }
         }
         
         return response()->json([

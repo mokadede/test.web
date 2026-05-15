@@ -9,7 +9,29 @@ class Order extends Model
 {
     protected $primaryKey = 'order_id';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'tracking_code',
+        'order_number',
+        'customer_name',
+        'phone_number',
+        'shoe_brand',
+        'shoe_size',
+        'shoe_condition',
+        'service_category',
+        'service_name',
+        'additional_fees',
+        'total_price',
+        'estimated_days',
+        'payment_method',
+        'payment_status',
+        'status',
+        'notes',
+        'created_by',
+        'external_id',
+        'voucher_code',
+        'discount_amount',
+        'add_ons'
+    ];
     
     protected $casts = [
         'add_ons' => 'array',
