@@ -660,7 +660,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <div class="workshop-time">
                     <span>Senin - Minggu:</span>
-                    09.00 - 20.00 WIB
+                    09.00 - 21.00 WIB
                 </div>
             </div>
         </div>
@@ -676,7 +676,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <div class="workshop-time">
                     <span>Senin - Minggu:</span>
-                    10.00 - 20.00 WIB
+                    10.00 - 21.00 WIB
                 </div>
             </div>
         </div>
