@@ -70,6 +70,20 @@
         .nav-links { display: flex; align-items: center; gap: 2rem; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         .nav-links a { color: #f0f0f0 !important; transition: color 0.3s; }
         .nav-links a:hover { color: var(--neon) !important; }
+        .nav-links a:not(.nav-cta)::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--neon);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:not(.nav-cta):hover::after {
+            width: 100%;
+        }
+        .nav-links a { position: relative; }
         .nav-links a.nav-cta { padding: 10px 24px !important; background: #FEFE01 !important; color: #000000 !important; font-weight: 900 !important; border-radius: 6px; font-size: 0.8rem; letter-spacing: 1px; transition: all 0.3s; text-decoration: none !important; text-transform: uppercase; text-shadow: none !important; }
         .nav-links a.nav-cta:hover { background: #ffffff !important; color: #000000 !important; box-shadow: 0 0 20px rgba(254,254,1,0.6); }
         .hamburger { display: none; background: none; border: none; cursor: pointer; }
@@ -317,8 +331,13 @@
         /* WORKSHOPS */
         .workshops { padding: 100px 1.5rem; background: var(--surface); }
         .workshop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5rem; max-width: 1000px; margin: 3rem auto 0; }
-        .workshop-card { background: var(--surface2); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 2.5rem; transition: all 0.4s; }
-        .workshop-card:hover { transform: translateY(-8px); border-color: var(--neon); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .workshop-card { background: var(--surface2); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 2.5rem; transition: all 0.4s ease; }
+        .workshop-card:hover { 
+            transform: translateY(-12px) scale(1.02) !important; 
+            border-color: var(--neon) !important; 
+            box-shadow: 0 20px 50px rgba(254,254,1,0.15) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
         .workshop-img { width: 100%; aspect-ratio: 16/9; background: rgba(255,255,255,0.03); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.05); }
         .workshop-img svg { width: 64px; height: 64px; color: var(--gray); opacity: 0.2; }
         .workshop-card h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.75rem; text-transform: uppercase; }
