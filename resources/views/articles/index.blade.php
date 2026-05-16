@@ -42,11 +42,14 @@
         html:not(.dark) .text-neon {
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
+        html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--dark); 
             color: var(--white); 
             transition: all 0.5s ease;
+            overflow-x: hidden;
+            width: 100%;
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 8rem 1.5rem 4rem; }
         .nav { position: fixed; top: 0; width: 100%; z-index: 100; background: #080808; border-bottom: 1px solid rgba(128,128,128,0.2); }
@@ -176,8 +179,8 @@
             <div class="nav-links">
                 <a href="{{ route('home') }}">Beranda</a>
                 <a href="{{ route('home') }}#services">Layanan</a>
-                <a href="{{ route('home') }}#articles">Artikel</a>
                 <a href="{{ route('home') }}#process">Proses</a>
+                <a href="{{ route('home') }}#articles">Artikel</a>
                 <a href="{{ route('home') }}#workshops">Lokasi</a>
                 @auth
                     <a href="{{ url('/dashboard') }}" class="nav-cta">Dashboard</a>

@@ -47,12 +47,13 @@
         html:not(.dark) .card:not(:hover) .card-icon svg:not([style*="stroke:#000"]) {
             filter: drop-shadow(0px 0px 1px #000) drop-shadow(0px 0px 1px #000);
         }
-        html { scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--dark); 
             color: var(--white); 
             overflow-x: hidden;
+            width: 100%;
             transition: background-color 0.5s ease, color 0.5s ease;
         }
         /* Smooth transitions for all theme-affected elements */
@@ -386,8 +387,8 @@
         <div class="nav-links">
             <a href="#">Beranda</a>
             <a href="#services">Layanan</a>
-            <a href="#articles">Artikel</a>
             <a href="#process">Proses</a>
+            <a href="#articles">Artikel</a>
             <a href="#workshops">Lokasi</a>
             @auth
                 <a href="{{ url('/dashboard') }}" class="nav-cta" style="color: #000 !important; background: #FEFE01 !important; font-weight: 900 !important;">Dashboard</a>
@@ -408,7 +409,7 @@
 <!-- HERO -->
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-badge">🔥 #1 Shoe Laundry di Bandung Sejak 2019</div>
+        <div class="hero-badge">Bandung's No.1 Shoe Laundry Since 2019</div>
         <h1>Perawatan Sepatu <span>Premium di Bandung</span></h1>
         <p class="hero-desc">Kembalikan tampilan sepatu favorit Anda seperti baru. Tim ahli dengan teknologi pembersihan terkini — cepat, bersih, dan terjamin.</p>
         <div class="hero-buttons">
@@ -588,6 +589,19 @@
     </div>
 </section>
 
+<!-- PROCESS -->
+<section id="process" class="process">
+    <div class="section-label">Cara Kerja</div>
+    <h2 class="section-title">Proses Mudah & Transparan</h2>
+    <p class="section-desc">Hanya 4 langkah sederhana untuk mendapatkan sepatu bersih seperti baru.</p>
+    <div class="steps">
+        <div class="step"><div class="step-num">1</div><h4>Booking Online</h4><p>Daftar & pilih layanan yang Anda butuhkan lewat WhatsApp.</p></div>
+        <div class="step"><div class="step-num">2</div><h4>Drop Off / Pickup</h4><p>Antar sepatu ke workshop kami atau gunakan layanan jemput.</p></div>
+        <div class="step"><div class="step-num">3</div><h4>Proses Cuci</h4><p>Tim ahli mengerjakan sepatu Anda dengan teknik dan sabun premium.</p></div>
+        <div class="step"><div class="step-num">4</div><h4>Selesai!</h4><p>Sepatu bersih siap diambil.</p></div>
+    </div>
+</section>
+
 <!-- ARTICLES -->
 <section id="articles" class="services">
     <div class="services-inner">
@@ -648,24 +662,11 @@
     </div>
 </section>
 
-<!-- PROCESS -->
-<section id="process" class="process">
-    <div class="section-label">Cara Kerja</div>
-    <h2 class="section-title">Proses Mudah & Transparan</h2>
-    <p class="section-desc">Hanya 4 langkah sederhana untuk mendapatkan sepatu bersih seperti baru.</p>
-    <div class="steps">
-        <div class="step"><div class="step-num">1</div><h4>Booking Online</h4><p>Daftar & pilih layanan yang Anda butuhkan lewat WhatsApp.</p></div>
-        <div class="step"><div class="step-num">2</div><h4>Drop Off / Pickup</h4><p>Antar sepatu ke workshop kami atau gunakan layanan jemput.</p></div>
-        <div class="step"><div class="step-num">3</div><h4>Proses Cuci</h4><p>Tim ahli mengerjakan sepatu Anda dengan teknik dan sabun premium.</p></div>
-        <div class="step"><div class="step-num">4</div><h4>Selesai!</h4><p>Sepatu bersih siap diambil.</p></div>
-    </div>
-</section>
-
 <!-- WORKSHOPS -->
 <section id="workshops" class="workshops">
     <div class="section-label">Lokasi Workshop</div>
-    <h2 class="section-title">Kunjungi Workshop Kami</h2>
-    <p class="section-desc">Temukan fasilitas modern kami di berbagai kota utama.</p>
+    <h2 class="section-title">Workshop Kami</h2>
+    <p class="section-desc">Temukan Workshop Kami Di Kota Cimahi Untuk Kebutuhan Laundry Sepatu.</p>
 
     <div class="workshop-grid">
         <!-- Card 1 -->

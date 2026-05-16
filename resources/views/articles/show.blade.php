@@ -26,12 +26,15 @@
             --gray: #555555;
             --white: #111111;
         }
+        html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--dark); 
             color: var(--white); 
             line-height: 1.6;
             transition: background-color 0.5s ease, color 0.5s ease;
+            overflow-x: hidden;
+            width: 100%;
         }
         .nav { position: fixed; top: 0; width: 100%; z-index: 100; background: #080808; border-bottom: 1px solid rgba(128,128,128,0.2); }
         .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 72px; }
@@ -102,8 +105,8 @@
             <div class="nav-links">
                 <a href="{{ route('home') }}">Beranda</a>
                 <a href="{{ route('home') }}#services">Layanan</a>
-                <a href="{{ route('home') }}#articles">Artikel</a>
                 <a href="{{ route('home') }}#process">Proses</a>
+                <a href="{{ route('home') }}#articles">Artikel</a>
                 <a href="{{ route('home') }}#workshops">Lokasi</a>
                 @auth
                     <a href="{{ url('/dashboard') }}" class="nav-cta">Dashboard</a>
