@@ -9,8 +9,10 @@ use App\Http\Controllers\ArticleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ArticleController::class, 'index'])->name('home');
-Route::get('/articles', [ArticleController::class, 'blogIndex'])->name('articles.index');
-Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
+Route::middleware('restrict_direct')->group(function () {
+    Route::get('/articles', [ArticleController::class, 'blogIndex'])->name('articles.index');
+    Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
+});
 
 // Public tracking page (no login required)
 Route::get('/track', [TrackingController::class, 'index'])->name('track');

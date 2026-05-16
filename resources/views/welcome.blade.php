@@ -376,6 +376,20 @@
     </style>
 </head>
 <body class="bg-grid">
+    @if(session('error'))
+        <div id="errorAlert" style="position: fixed; top: 90px; left: 50%; transform: translateX(-50%); z-index: 9999; background: #ff4d4d; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 700; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 15px; min-width: 320px; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); animation: alertSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span>{{ session('error') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">&times;</button>
+        </div>
+        <style>
+            @keyframes alertSlideIn { from { transform: translateX(-50%) translateY(-100px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+            #errorAlert button:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+        </style>
+        <script>setTimeout(() => { const el = document.getElementById('errorAlert'); if(el) { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(-20px)'; el.style.transition = 'all 0.5s ease'; setTimeout(() => el.remove(), 500); } }, 6000);</script>
+    @endif
 
 <!-- NAV -->
 <nav class="nav">

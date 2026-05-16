@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'is_admin' => \App\Http\Middleware\IsAdmin::class,
+            'restrict_direct' => \App\Http\Middleware\RestrictDirectAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
