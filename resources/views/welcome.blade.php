@@ -498,7 +498,7 @@
         <div style="text-align: center; margin-bottom: 4.5rem;">
             <div class="section-label" style="margin-bottom: 1rem;">Layanan Kami</div>
             <h2 class="section-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1.5rem; color: var(--white);">Solusi Lengkap Perawatan Sepatu</h2>
-            <p style="max-width: 650px; margin: 0 auto; color: var(--gray); font-size: 1.1rem; line-height: 1.7;">Dari pembersihan rutin hingga restorasi total, kami punya layanan untuk setiap kebutuhan sneakers Anda.</p>
+            <p style="max-width: 650px; margin: 0 auto; color: var(--gray); font-size: 1.1rem; line-height: 1.7;">Dari pembersihan rutin hingga restorasi total, kami punya layanan untuk setiap kebutuhan sepatu Anda.</p>
         </div>
         
         <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
@@ -607,7 +607,7 @@
     <div class="services-inner">
         <div class="section-label">Berita & Artikel</div>
         <h2 class="section-title">Artikel Terbaru Kami</h2>
-        <p class="section-desc">Dapatkan tips perawatan sepatu dan informasi terbaru seputar dunia fashion & sneakers.</p>
+        <p class="section-desc">Dapatkan tips perawatan sepatu dan informasi terbaru seputar dunia fashion & sepatu.</p>
         
         <div class="articles-container">
             <div id="articlesGrid" class="articles-grid @if(count($articles) > 3) is-carousel @endif">
