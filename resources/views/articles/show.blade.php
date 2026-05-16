@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $article->title }} — K-Clean Bandung</title>
+    <link rel="icon" href="{{ asset('images/favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -94,6 +95,16 @@
         }
         @media (max-width: 640px) { .footer-inner { grid-template-columns: 1fr; gap: 2.5rem; } }
         .bg-grid { background-image: radial-gradient(rgba(254,254,1,0.04) 1px, transparent 1px); background-size: 28px 28px; }
+
+        /* PROCESS */
+        .process { padding: 100px 1.5rem; max-width: 1200px; margin: 0 auto; text-align: center; }
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-top: 3rem; }
+        .step { text-align: center; position: relative; }
+        .step-num { width: 48px; height: 48px; background: var(--neon); color: #000; font-weight: 900; font-size: 1.1rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; box-shadow: 0 0 20px rgba(254,254,1,0.2); }
+        .step h4 { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; color: var(--white); }
+        .step p { color: var(--gray); font-size: 0.85rem; line-height: 1.6; }
+        @media (max-width: 768px) { .steps { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 480px) { .steps { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body class="bg-grid">
